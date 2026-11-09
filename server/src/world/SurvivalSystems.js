@@ -107,6 +107,7 @@ class SocialSystems {
   createClan(player, name) { const clean = String(name || "").trim().slice(0, 24); if (clean.length < 3 || player.clanId) return { ok: false, reason: "invalid-clan" }; const id = `clan_${this.clans.size + 1}`; const clan = { id, name: clean, leaderId: player.id, members: [player.id] }; this.clans.set(id, clan); player.clanId = id; return { ok: true, clan }; }
   joinClan(player, clanId) { const clan = this.clans.get(clanId); if (!clan || player.clanId) return { ok: false, reason: "clan-unavailable" }; clan.members.push(player.id); player.clanId = clanId; return { ok: true, clan }; }
   createTrade(player, item, quantity, priceItem, priceQuantity) {
+    if ((slotCounts(player.slots)[item] || 0) < quantity) return { ok: false, reason: "not-enough-resources" };
     if (!ITEMS[item] || !ITEMS[priceItem] || !Number.isInteger(quantity) || !Number.isInteger(priceQuantity) || quantity < 1 || priceQuantity < 1) return { ok: false, reason: "invalid-trade" };
     const id = `trade_${this.nextTrade++}`; this.trades.set(id, { id, sellerId: player.id, item, quantity, priceItem, priceQuantity, status: "open" }); return { ok: true, trade: this.trades.get(id) };
   }
