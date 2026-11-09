@@ -1,56 +1,50 @@
 # Pixel Frontier
 
-**A living multiplayer pixel-art survival world.** Explore a shared wilderness, gather resources, build a settlement and leave a mark other players can discover.
+**Kadim sınır diyarında yaşayan çok oyunculu bir hayatta kalma ve yerleşim kurma oyunu.**
 
-> Pixel art on the surface. A systemic, persistent world underneath.
+Oyuncular bilinmeyen bir dünyaya yolcu olarak gelir; kaynak toplar, alet üretir, sığınak kurar, kabile kurup ortak bir yurt inşa eder. Görsel kimlik eski çağlardan esinlenen piksel sanatıdır: sisli ormanlar, taş kalıntılar, ahşap yapılar, bronz ve parşömen arayüz.
 
-## Playable foundation
-- Phaser 3 browser client, top-down camera and pixel rendering.
-- Node.js, Express and Socket.io server.
-- Server-authoritative movement, input validation and player lifecycle.
-- Deterministic seeded trees, stones and berries.
-- Server-validated gathering, a 24-slot inventory, primitive equipment, crafting, structures and chest storage.
-- Seeded biome chunks, collision rules, day/night, weather and ambient wildlife.
-- Optional PostgreSQL persistence for player sessions, chunks, structures, clans, trades and world clock.
-- Signed anonymous player sessions that restore inventory and position on reconnect.
-- Multiplayer join/leave, chunk-indexed player visibility and bounded logical Socket.IO lobbies (50 players each).
-- Clan totems, 400×400 territory boundaries, safe-perimeter placement rules and one-second dominance summaries.
-- Pixel depth sorting, translucent tree canopies, short gather particles and explicit Phaser object cleanup.
-- Node test runner and GitHub Actions CI.
+## Oynanabilir temel
+- Phaser 3 tarayıcı istemcisi ve Node.js / Express / Socket.IO sunucusu.
+- Sunucu otoriteli hareket, kaynak toplama, envanter, zanaat ve inşa.
+- 24 gözlü çanta, alet kuşanma ve sandık depolama.
+- Orman, göl, dağ ve çayır biyomları; gündüz/gece, hava ve çevresel canlılar.
+- İsteğe bağlı PostgreSQL kalıcılığı.
+- Chunk tabanlı oyuncu görünürlüğü ve süreç içi 50 kişilik mantıksal lobi.
+- Kabile totemleri, 400×400 toprak sınırları ve hâkimiyet özeti.
 
-## Run locally
-Requires Node.js 20+.
+## Yerel çalıştırma
+Node.js 20+ gerekir.
 
 ```bash
 npm install
 cp .env.example .env
-# Set DATABASE_URL and SESSION_SECRET in .env for persistent saves.
+# Kalıcı kayıt için .env içine DATABASE_URL ve SESSION_SECRET ekle.
 npm run dev
 ```
 
-Open http://localhost:3000 in two browser profiles (or one normal and one private window) to test distinct player sessions.
+Tarayıcıda http://localhost:3000 adresini aç. İki ayrı oyuncuyu test etmek için iki ayrı tarayıcı profili veya normal/gizli pencere kullan.
 
-## Controls
-- WASD / Arrow keys — move
-- E — gather nearest resource
-- Gather button — gather on touch devices
-- Build wall / Campfire — select a structure, then click/tap nearby in the world
+## Kontroller
+- WASD / Ok tuşları — hareket
+- E — yakındaki kaynağı topla
+- F — yakındaki sandığı aç
+- İnşa düğmesi — yapıyı seç, sonra dünyada yakındaki noktaya tıkla
+- Envanterde bir yuvayı seç, ardından hedef yuvaya tıklayarak taşı
+- Zanaat tezgâhından tahta balta veya taş kazma üret
 
-Gather with E. Craft wooden axe or pickaxe from 15 wood. Use the 24-slot backpack to move items and equip tools.
+## İlk hedef
+15 odun ve 5 taş topla → tahta balta üret → erzak sandığı yerleştir → kabile kur. Bu arayüz rehberidir; görev ilerlemesi henüz sunucu tarafında kalıcı görev sistemi değildir.
 
-Structures: wood wall (10 wood), stone wall (20 stone), wood door (20 wood), chest (8 wood + 2 stone). Press F near an accessible chest. Clan owners can share their doors and chests with clan members.
+## Güvenlik ve ölçek
+Üretimde ALLOWED_ORIGINS değerini tam HTTPS origin listesiyle yapılandır. Mevcut lobi tahsisi süreç içidir; çoklu sunucu dünya parçalama sistemi değildir. Ayrıntılar için `docs/SCALING_ARCHITECTURE.md` ve `docs/PRODUCTION_SECURITY.md` dosyalarına bak.
 
-For production, configure ALLOWED_ORIGINS as a comma-separated list of exact HTTPS origins. The current lobby allocator is process-local; it does not provide multi-node world sharding. See [docs/SCALING_ARCHITECTURE.md](docs/SCALING_ARCHITECTURE.md) and [docs/PRODUCTION_SECURITY.md](docs/PRODUCTION_SECURITY.md).
+DATABASE_URL olmadan dünya prototip amaçlı bellekte çalışır. Sunucu yeniden başlatmaları arasında kayıt için DATABASE_URL ve kararlı SESSION_SECRET gerekir.
 
-PostgreSQL is optional for local prototyping. Without DATABASE_URL the world runs in memory; set DATABASE_URL and a stable SESSION_SECRET to persist player/world data across restarts.
+## Proje yapısı
+- `public/` — Phaser istemcisi ve arayüz
+- `server/` — otoriter oyun sunucusu
+- `tests/` — otomatik testler
+- `docs/` — tasarım, dünya, ağ ve yol haritası
 
-## Structure
-- `public/` — Phaser client and UI
-- `server/` — authoritative game server and world systems
-- `tests/` — automated tests
-- `docs/` — design, world, networking and 90-day roadmap
-
-## Design promise
-Not another disposable survival arena: Pixel Frontier is built around player-authored settlements, meaningful cooperation, regional ecology, trade routes and a world with memory. Competitive systems will be balanced around protected starter regions and fair offline rules.
-
-See [docs/ROADMAP.md](docs/ROADMAP.md) for the 90-day plan. MIT License.
+MIT License.
