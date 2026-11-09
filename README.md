@@ -2,7 +2,7 @@
 
 **Kadim sınır diyarında yaşayan çok oyunculu bir hayatta kalma ve yerleşim kurma oyunu.**
 
-Oyuncular bilinmeyen bir dünyaya yolcu olarak gelir; kaynak toplar, alet üretir, sığınak kurar, kabile kurup ortak bir yurt inşa eder. Görsel kimlik eski çağlardan esinlenen piksel sanatıdır: sisli ormanlar, taş kalıntılar, ahşap yapılar, bronz ve parşömen arayüz.
+Oyuncular bilinmeyen bir dünyaya yolcu olarak gelir; kaynak toplar, zanaat yapar, çiftçilik ve keşifle ilerler, tek başına yaşayabilir veya bir topluluğa katılarak ortak bir yurt kurabilir. Görsel kimlik eski çağlardan esinlenen piksel sanatıdır: sisli ormanlar, taş kalıntılar, ahşap yapılar, bronz ve parşömen arayüz.
 
 ## Oynanabilir temel
 - Phaser 3 tarayıcı istemcisi ve Node.js / Express / Socket.IO sunucusu.
@@ -12,6 +12,7 @@ Oyuncular bilinmeyen bir dünyaya yolcu olarak gelir; kaynak toplar, alet üreti
 - İsteğe bağlı PostgreSQL kalıcılığı.
 - Chunk tabanlı oyuncu görünürlüğü ve süreç içi 50 kişilik mantıksal lobi.
 - Kabile totemleri, 400×400 toprak sınırları ve hâkimiyet özeti.
+- Oyuncu sayısı yalnızca canlı insan oturumlarını gösterir; bot oyuncu yoktur.
 
 ## Yerel çalıştırma
 Node.js 20+ gerekir.
@@ -31,10 +32,10 @@ Tarayıcıda http://localhost:3000 adresini aç. İki ayrı oyuncuyu test etmek 
 - F — yakındaki sandığı aç
 - İnşa düğmesi — yapıyı seç, sonra dünyada yakındaki noktaya tıkla
 - Envanterde bir yuvayı seç, ardından hedef yuvaya tıklayarak taşı
-- Zanaat tezgâhından tahta balta veya taş kazma üret
+- Tahta balta veya taş kazma üret; çalışma tezgâhını yerleştir
 
 ## İlk hedef
-15 odun ve 5 taş topla → tahta balta üret → erzak sandığı yerleştir → kabile kur. Bu arayüz rehberidir; görev ilerlemesi henüz sunucu tarafında kalıcı görev sistemi değildir.
+15 odun ve 5 taş topla → tahta balta üret → çalışma tezgâhı kur → erzak sandığı yerleştir. Kabileye katılmak isteğe bağlıdır. Bu rehber henüz istemci tarafında tutulur; kalıcı sunucu görev sistemi yol haritasındadır.
 
 ## Güvenlik ve ölçek
 Üretimde ALLOWED_ORIGINS değerini tam HTTPS origin listesiyle yapılandır. Mevcut lobi tahsisi süreç içidir; çoklu sunucu dünya parçalama sistemi değildir. Ayrıntılar için `docs/SCALING_ARCHITECTURE.md` ve `docs/PRODUCTION_SECURITY.md` dosyalarına bak.
