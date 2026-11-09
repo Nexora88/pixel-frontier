@@ -78,7 +78,7 @@ class ChestStore {
     else if (destination.item === item && destination.quantity + count <= max) destination.quantity += count;
     else if (count === sourceCopy[from].quantity) { targetCopy[to] = sourceCopy[from]; sourceCopy[from] = destination; }
     else return { ok: false, reason: "slot-unavailable" };
-    if (sourceCopy[from]) { sourceCopy[from].quantity -= count; if (sourceCopy[from].quantity <= 0) sourceCopy[from] = null; }
+    if (sourceCopy[from] && sourceCopy[from].item === item) { sourceCopy[from].quantity -= count; if (sourceCopy[from].quantity <= 0) sourceCopy[from] = null; }
     source.splice(0, source.length, ...sourceCopy); target.splice(0, target.length, ...targetCopy);
     return { ok: true, playerSlots: player.slots, chestSlots: chest.slots };
   }
