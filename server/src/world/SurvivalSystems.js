@@ -91,7 +91,7 @@ function canOccupy(seed, x, y, worldWidth, worldHeight, buildings = []) {
   return !buildings.some(b => b.solid !== false && Math.abs(b.x - x) < 22 && Math.abs(b.y - y) < 22);
 }
 class EnvironmentSimulation {
-  constructor(seed = "pixel-frontier", options = {}) { this.seed = seed; this.dayLengthMs = options.dayLengthMs || 24 * 60 * 1000; this.startedAt = options.startedAt || Date.now(); this.weather = "clear"; this.weatherChangedAt = this.startedAt; this.animals = new Map(); this.nextAnimal = 1; }
+  constructor(seed = "pixel-frontier", options = {}) { this.seed = seed; this.dayLengthMs = options.dayLengthMs || 24 * 60 * 1000; this.startedAt = options.startedAt ?? Date.now(); this.weather = "clear"; this.weatherChangedAt = this.startedAt; this.animals = new Map(); this.nextAnimal = 1; }
   snapshot(now = Date.now()) {
     const phase = ((now - this.startedAt) % this.dayLengthMs) / this.dayLengthMs;
     const hour = Math.floor(phase * 24), weatherCycle = Math.floor((now - this.weatherChangedAt) / 180000);
@@ -104,7 +104,7 @@ class EnvironmentSimulation {
 }
 class SocialSystems {
   constructor() { this.clans = new Map(); this.trades = new Map(); this.nextTrade = 1; }
-  createClan(player, name) { const clean = String(name || "").trim().slice(0, 24); if (clean.length < 3 || player.clanId) return { ok: false, reason: "invalid-clan" }; const id = `clan_${this.clans.size + 1}`; const clan = { id, name: clean, leaderId: player.id, members: [player.id] }; this.clans.set(id, clan); player.clanId = id; return { ok: true, clan }; }
+  createClan(player, name) { const clean = String(name || "").trim().slice(0, 24); if (clean.length < 3 || player.clanId) return { ok: false, reason: "invalid-clan" }; const id = `clan_${Math.max(0,...[...this.clans.keys()].map(key=>Number(key.split("_").at(-1))||0))+1}`; const clan = { id, name: clean, leaderId: player.id, members: [player.id] }; this.clans.set(id, clan); player.clanId = id; return { ok: true, clan }; }
   joinClan(player, clanId) { const clan = this.clans.get(clanId); if (!clan || player.clanId) return { ok: false, reason: "clan-unavailable" }; clan.members.push(player.id); player.clanId = clanId; return { ok: true, clan }; }
   createTrade(player, item, quantity, priceItem, priceQuantity) {
     if ((slotCounts(player.slots)[item] || 0) < quantity) return { ok: false, reason: "not-enough-resources" };
