@@ -9,7 +9,7 @@ class TerritorySystem {
     this.social = social;
     this.playerTerritories = new Map();
     this.lastDominanceAt = 0;
-    this.cachedDominance = [];
+    this.cachedDominance = [];\n    this.cachedTerritories = [];\n    this.dirty = true;
   }
 
   isSafeZone(x, y) {
