@@ -7,7 +7,7 @@ export class WorldScene extends Phaser.Scene {
     this.input.keyboard.on("keydown-E",()=>this.gatherNearest());this.input.keyboard.on("keydown-F",()=>this.openNearestChest());
     this.input.on("pointerdown",p=>{if(!this.buildMode||!this.net.connected)return;const q=this.cameras.main.getWorldPoint(p.x,p.y);this.net.emit("world:build",{type:this.buildMode,x:q.x,y:q.y})});
     this.bindNetwork();this.lightingOverlay=this.add.rectangle(0,0,this.scale.width,this.scale.height,0x10152b,0).setOrigin(0).setScrollFactor(0).setDepth(900);
-    this.scale.on("resize",size=>this.lightingOverlay.setSize(size.width));
+    this.scale.on("resize",size=>this.lightingOverlay.setSize(size.width,size.height));
     this.environmentLabel=this.add.text(12,12,"",{fontFamily:"monospace",fontSize:"11px",color:"#fff",backgroundColor:"#15251dcc",padding:{x:6,y:4}}).setScrollFactor(0).setDepth(1000);
     this.events.once("shutdown",()=>this.cleanup());this.events.once("destroy",()=>this.cleanup());
   }
@@ -21,7 +21,7 @@ export class WorldScene extends Phaser.Scene {
     this.net.on("world:gather:result",r=>{if(r.ok)this.emitGatherParticles(r.item)});
     for(const e of ["world:gather:result","world:build:result","world:craft:result","inventory:result","equipment:result","chest:result","chest:opened","clan:result","trade:result"])this.net.on(e,r=>this.events.emit("action-result",{...r,event:e}));
   }
-  updateEnvironment(d){if(!this.environmentLabel||!d)return;this.environmentLabel.setText(`DAY ${d.day} · ${String(d.hour).padStart(2,"0")}:00 · ${d.weather.toUpperCase()}`);this.environmentLabel.setColor(d.isNight?"#b9c8ff":"#fff1c2");this.lightingOverlay.setFillStyle(0x10152b,d.isNight?.32:0)}
+  updateEnvironment(d){if(!this.environmentLabel||!d)return;this.environmentLabel.setText(`DAY ${d.day} · ${String(d.hour).padStart(2,"0")}:00 · ${d.weather.toUpperCase()}`);this.environmentLabel.setColor(d.isNight?"#b9c8ff":"#fff1c2");this.lightingOverlay.setFillStyle(0x10152b,d.isNight ? 0.32 : 0)}
   updateAnimals(items){const visible=new Set(items.map(a=>a.id));for(const[id,o]of this.animals)if(!visible.has(id)){o.destroy();this.animals.delete(id)}for(const a of items){if(!this.animals.has(a.id)){const color=a.species==="duck"?0x8fc6d4:a.species==="rabbit"?0xd6c6a8:0x9eaa8b;this.animals.set(a.id,this.add.circle(a.x,a.y,5,color).setStrokeStyle(1,0x26332a).setDepth(a.y))}this.animals.get(a.id).setPosition(a.x,a.y).setDepth(a.y)}}
   upsert(d){
     let p=this.players.get(d.id);if(!p){const body=this.add.sprite(d.x,d.y,"survivor",0).setOrigin(.5,.78).setDepth(d.y),label=this.add.text(d.x,d.y-23,"",{fontFamily:"monospace",fontSize:"9px",color:"#fff",backgroundColor:"#142018",padding:{x:3,y:2}}).setOrigin(.5).setDepth(d.y+1),tool=this.add.sprite(d.x+8,d.y+1,"items",12).setScale(1.1).setDepth(d.y+2);p={body,label,tool,x:d.x,y:d.y,direction:"down"};this.players.set(d.id,p)}
