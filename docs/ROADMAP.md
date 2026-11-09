@@ -13,6 +13,9 @@ Implemented in the current development branch:
 - [x] Biome movement modifiers, blocked terrain and structure collision
 - [x] Server-driven day/night, weather state and basic wildlife wandering
 - [x] Clan membership and validated barter settlement
+- [x] Process-local 50-player lobby allocation and Socket.IO room assignment
+- [x] Chunk-indexed online player visibility and building collision index
+- [x] Clan totem territory rendering, safe-perimeter placement and dominance snapshots
 
 ## Remaining milestones
 - [ ] Live PostgreSQL deployment verification with production credentials and backup/restore drill
@@ -22,7 +25,10 @@ Implemented in the current development branch:
 - [ ] Account recovery, moderation, invite-based clan permissions and offline trade escrow
 - [ ] Hunger, rest, health and non-combat survival pressure
 - [ ] Protected starter regions, anti-camping and fair competitive rules
-- [ ] Load tests, abuse/rate-limit tests, observability and production runbook
+- [ ] Redis-backed gateway fan-out and authoritative world-shard ownership (required before multi-node scaling)
+- [ ] Automatic lobby placement across multiple world shards and autoscaling
+- [ ] Cloudflare WAF/origin lockdown, abuse/rate-limit tests, observability and production runbook
+- [ ] 2k–5k concurrent-player load tests and repeatable CPU/heap profiling
 
 ## Performance exit criteria
 Nearby chunk subscriptions remain bounded; no full-world broadcast is introduced. Capacity claims require repeatable load tests and profiling.
