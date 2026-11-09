@@ -1,0 +1,1 @@
+const WORLD=Object.freeze({width:3200,height:2400,chunkSize:400,seed:process.env.WORLD_SEED||"pixel-frontier-alpha"});const GAME=Object.freeze({tickMs:50,snapshotMs:100,playerSpeed:180,interactionRange:76,maxPlayers:Number.parseInt(process.env.MAX_PLAYERS||"64",10),inputRateLimitMs:25});module.exports={WORLD,GAME};
