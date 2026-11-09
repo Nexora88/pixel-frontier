@@ -8,7 +8,8 @@ This is a scope plan, not a claim that every feature is already implemented. Eac
 - [x] Deterministic starter resource field
 - [x] Basic gathering, inventory counters and two build recipes
 - [x] CI and unit-test baseline
-- [ ] Sprite sheets, animation states and sound
+- [x] First directional pixel survivor sprite sheet and movement animations
+- [ ] Procedural biomes and region generation
 - [ ] Chunk subscriptions and interest management
 - [ ] PostgreSQL player/world persistence
 
