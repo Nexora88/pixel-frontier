@@ -12,7 +12,7 @@ async handleConnection(s){
 if(this.players.players.size>=GAME.maxPlayers){s.emit("server:full");s.disconnect(true);return}
 const playerId=s.data.playerId;if(!playerId){s.disconnect(true);return}
 const existing=this.players.get(playerId);if(existing){const oldSocket=this.io.sockets.sockets.get(existing.socketId);if(oldSocket)oldSocket.disconnect(true);this.lobbies.release(playerId);this.players.remove(playerId)}
-const saved=this.persistence?.enabled?await this.persistence.loadPlayer(playerId):null,p=this.players.add(playerId,s.id,saved,this.world);
+const saved=this.persistence?.enabled?await this.persistence.loadPlayer(playerId):null,p=this.players.add(playerId,s.id,saved,this.world);const lobby=this.lobbies.assign(playerId);p.lobbyId=lobby.id;s.join(`lobby:${lobby.id}`);s.emit("lobby:assigned",lobby);
 s.emit("session:token",s.data.sessionToken);
 const initial=this.world.getNearbyChunks(p.x,p.y);
 s.emit("world:init",{ownId:p.id,world:{width:WORLD.width,height:WORLD.height,chunkSize:WORLD.chunkSize},players:this.players.publicPlayers(this.visiblePlayers(p),p.id),worldState:{seed:this.world.seed,chunks:initial},environment:this.environment.snapshot(),territories:this.territorySystem.snapshot(),inventory:{slots:p.slots,equipment:p.equipment,inventory:p.inventory}});
