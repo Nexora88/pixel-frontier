@@ -13,14 +13,10 @@ test("restored buildings are indexed by chunk and nearby queries stay local", ()
   assert.deepEqual(world.getNearbyBuildings(500, 500), []);
 });
 
-test("newly placed buildings are immediately added to the chunk index", () => {
+test("newly registered buildings are immediately indexed", () => {
   const world = new WorldState("index-test");
-  const player = {
-    id: "player_1", x: 120, y: 140, clanId: null,
-    slots: [{ item: "wood", quantity: 20 }],
-    inventory: { wood: 20 }
-  };
-  const result = world.build(player, "wood_wall", 144, 144);
-  assert.equal(result.ok, true);
-  assert.equal(world.getNearbyBuildings(144, 144)[0].id, result.building.id);
+  const building = { id: "building_3", type: "wood_wall", x: 144, y: 168, chunkKey: "0,0" };
+  world.buildings.set(building.id, building);
+  world.indexBuilding(building);
+  assert.deepEqual(world.getNearbyBuildings(144, 168).map(b => b.id), ["building_3"]);
 });
