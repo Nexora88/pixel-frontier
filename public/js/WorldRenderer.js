@@ -95,6 +95,12 @@ export class WorldRenderer {
       shape.fillStyle(0x59371f,1).fillRect(-9,-15,18,30);shape.fillStyle(0x9b6b3b,1).fillRect(-7,-13,14,26);shape.lineStyle(1,0x4b2d1a,1).lineBetween(0,-12,0,12);shape.fillStyle(0xe2b96d,1).fillCircle(5,0,2);shape.lineStyle(2,0x2e2117,1).strokeRect(-9,-15,18,30);
     }else if(chest){
       shape.fillStyle(0x6c4528,1).fillRect(-13,-9,26,18);shape.fillStyle(0xb17b42,1).fillRect(-12,-8,24,7);shape.fillStyle(0x4b2c19,1).fillRect(-12,0,24,7);shape.fillStyle(0xd3a45d,1).fillRect(-2,-8,4,16);shape.fillStyle(0xe4c17a,1).fillRect(-2,-1,4,4);shape.lineStyle(2,0x342116,1).strokeRect(-13,-9,26,18);
+    }else if(workbench){
+      shape.fillStyle(0x57371f,1).fillRect(-16,-5,32,13);
+      shape.fillStyle(0x9b6a3a,1).fillRect(-17,-9,34,6);
+      shape.fillStyle(0x4a2d1b,1).fillRect(-13,8,4,8);shape.fillRect(9,8,4,8);
+      shape.fillStyle(0xb78a4e,1).fillRect(-7,-8,8,4);shape.fillStyle(0x7e8b79,1).fillRect(5,-8,7,3);
+      shape.lineStyle(1,0x2d1d12,1).strokeRect(-17,-9,34,17);
     }else if(campfire){
       shape.lineStyle(4,0x6a4528,1).lineBetween(-9,5,8,-4);shape.lineBetween(-9,-4,8,5);shape.fillStyle(0xd65d28,1).fillTriangle(-6,3,0,-12,6,3);shape.fillStyle(0xf3bc50,1).fillTriangle(-3,2,1,-7,4,2);
     }else{
