@@ -1,6 +1,6 @@
 import { WorldRenderer } from "./WorldRenderer.js";
 export class WorldScene extends Phaser.Scene {
-  constructor(net){super("WorldScene");this.net=net;this.players=new Map();this.localId=null;this.localClanId=null;this.lastInput="";this.buildMode=null;this.animals=new Map();this.particles=new Set();this.netUnsubs=[];this.lastCanopyUpdate=0;this.territoryToast=null}
+  constructor(net){super("WorldScene");this.net=net;this.players=new Map();this.localId=null;this.localClanId=null;this.lastInput="";this.buildMode=null;this.animals=new Map();this.particles=new Set();this.netUnsubs=[];this.lastSpawnProtection=null;this.lastCanopyUpdate=0;this.territoryToast=null}
   preload(){this.load.spritesheet("survivor","/assets/survivor.svg",{frameWidth:16,frameHeight:16});this.load.spritesheet("items","/assets/items.svg",{frameWidth:16,frameHeight:16})}
   create(){
     this.createPlayerAnimations();this.renderer=new WorldRenderer(this);this.cursors=this.input.keyboard.createCursorKeys();this.wasd=this.input.keyboard.addKeys("W,A,S,D");
@@ -16,9 +16,9 @@ export class WorldScene extends Phaser.Scene {
   bindNetwork(){
     this.listen("world:init",d=>{this.localId=d.ownId;this.localClanId=d.players.find(p=>p.id===this.localId)?.clanId||null;this.cameras.main.setBounds(0,0,d.world.width,d.world.height);this.renderer.drawGround(d.world.width,d.world.height,d.worldState.seed);d.worldState.chunks.forEach(c=>this.renderer.addChunk(c));d.players.forEach(p=>this.upsert(p));this.renderer.setTerritories(d.territories||[]);const me=this.players.get(this.localId);if(me)this.cameras.main.startFollow(me.body,true,.12,.12);this.updateEnvironment(d.environment);this.events.emit("ready",d);if(d.inventory)this.events.emit("inventory",d.inventory)});
     this.listen("world:chunk:load",c=>this.renderer.addChunk(c));this.listen("world:chunk:unload",({key})=>this.renderer.removeChunk(key));this.listen("player:joined",p=>this.upsert(p));this.listen("player:left",({id})=>this.remove(id));
-    this.listen("world:state",({players,environment,animals=[],spawnProtected})=>{const visible=new Set(players.map(p=>p.id));players.forEach(p=>this.upsert(p));for(const id of this.players.keys())if(id!==this.localId&&!visible.has(id))this.remove(id);this.updateEnvironment(environment);this.updateAnimals(animals);this.events.emit("spawn-protection",!!spawnProtected)});
+    this.listen("world:state",({players,environment,animals=[],spawnProtected})=>{const visible=new Set(players.map(p=>p.id));players.forEach(p=>this.upsert(p));for(const id of this.players.keys())if(id!==this.localId&&!visible.has(id))this.remove(id);this.updateEnvironment(environment);this.updateAnimals(animals);if(this.lastSpawnProtection!==!!spawnProtected){this.lastSpawnProtection=!!spawnProtected;this.events.emit("spawn-protection",this.lastSpawnProtection)}});
     this.listen("world:resource:removed",({id})=>this.renderer.removeResource(id));this.listen("world:building:placed",b=>{this.renderer.addBuilding(b);this.events.emit("building",b)});
-    this.listen("territory:update",items=>this.renderer.setTerritories(items));this.listen("territory:entered",({clanName})=>this.showTerritoryToast(clanName));this.listen("clan:dominance",rows=>this.events.emit("clan-dominance",rows));
+    this.listen("territory:update",items=>this.renderer.setTerritories(items));this.listen("territory:entered",({clanName})=>this.showTerritoryToast(clanName));this.listen("clan:dominance",rows=>this.events.emit("clan-dominance",rows));this.listen("clan:result",r=>{if(r.ok&&r.clan)this.localClanId=r.clan.id});
     this.listen("world:gather:result",r=>{if(r.ok)this.emitGatherParticles(r.item)});
     for(const e of ["world:gather:result","world:build:result","world:craft:result","inventory:result","equipment:result","chest:result","chest:opened","clan:result","trade:result"])this.listen(e,r=>this.events.emit("action-result",{...r,event:e}));
   }
