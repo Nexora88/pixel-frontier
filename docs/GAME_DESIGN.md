@@ -34,7 +34,14 @@ Keşfet → kaynakları topla → çantayı yönet → zanaat yap → tarım ve 
 - Tarifler oyuncuya maliyeti önceden göstermeli; malzeme yoksa açık ve tutarlı geri bildirim verilmeli.
 - İstemci yalnızca arayüzdür; eşya, tarif, sahiplik ve sonuçların tek doğruluk kaynağı sunucudur.
 
-## Yaşayan toplum ve zaman\n- Çiftçilik, zanaat, keşif, ticaret, inşaat ve toplama birbirinden bağımsız ilerleme yolları olmalıdır.\n- Kabile kurmak zorunlu değildir; kuruluş eşiği, kurucu onayı ve topluluk rolleri gerektirir.\n- Oyuncu sayısı yalnızca gerçek çevrimiçi insan oturumlarını sayar; bot oyuncu veya sahte nüfus yoktur.\n- Mevsimler tarım, görsel çevre ve yapı bakımı üzerinde etkili olur. Surlar zamanla yıpranır; bakım, onarım ve harabeye dönüşme döngüsü bulunur.\n- Yurt aidiyeti sancak, yerleşim adı, kronik ve ortak emekle kurulur; diğer topluluklara saygı esastır.\n\n## Uzun vadeli sistemler
+## Yaşayan toplum ve zaman
+- Çiftçilik, zanaat, keşif, ticaret, inşaat ve toplama birbirinden bağımsız ilerleme yolları olmalıdır.
+- Kabile kurmak zorunlu değildir; kuruluş eşiği, kurucu onayı ve topluluk rolleri gerektirir.
+- Oyuncu sayısı yalnızca gerçek çevrimiçi insan oturumlarını sayar; bot oyuncu veya sahte nüfus yoktur.
+- Mevsimler tarım, görsel çevre ve yapı bakımı üzerinde etkili olur. Surlar zamanla yıpranır; bakım, onarım ve harabeye dönüşme döngüsü bulunur.
+- Yurt aidiyeti sancak, yerleşim adı, kronik ve ortak emekle kurulur; diğer topluluklara saygı esastır.
+
+## Uzun vadeli sistemler
 - Meslekler: oduncu, taş ustası, izci, çiftçi, zanaatkâr ve tüccar. Kalıcı sınıf kilidi yerine değiştirilebilir uzmanlık.
 - Yerleşim: ortak depo, üretim tezgâhları, tarlalar, yollar, işaret levhaları ve yerleşim kroniği.
 - Keşif: harabe, mağara, eski yol, nadir kaynak ve bölgesel hikâyeler.
@@ -50,5 +57,7 @@ Keşfet → kaynakları topla → çantayı yönet → zanaat yap → tarım ve 
 5. **Adil çok oyunculu:** Çevrimdışı koruma, izinler, toparlanma ve savaş dışı ilerleme temel özelliklerdir.
 6. **Performans:** Efektler, sahne nesneleri, ağ paketleri ve sunucu işi sınırlı tutulur; kapasite ancak yük testleriyle ilan edilir.
 
-Ayrıntılı sistem kuralları ve kabul kriterleri için [Yaşayan Dünya Tasarımı](LIVING_WORLD_DESIGN.md) belgesine bak.\n\n## Savaş yaklaşımı
+Ayrıntılı sistem kuralları ve kabul kriterleri için [Yaşayan Dünya Tasarımı](LIVING_WORLD_DESIGN.md) belgesine bak.
+
+## Savaş yaklaşımı
 Savaş ana amaç değildir; keşif, üretim, yerleşim ve ticaret kadar önemli bir seçenek olabilir. Rekabet sistemleri ancak güvenli başlangıç, açık rıza, koruma pencereleri ve çevrimdışı adalet tasarlandıktan sonra açılmalıdır.
