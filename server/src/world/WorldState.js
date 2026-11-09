@@ -110,7 +110,14 @@ class WorldState {
     if (Math.hypot(player.x - x, player.y - y) > GAME.interactionRange * 1.5) return { ok: false, reason: "too-far" };
     if (canonical === "clan_totem" && !player.clanId) return { ok: false, reason: "clan-required" };
     const buildX = Math.round(x / 24) * 24, buildY = Math.round(y / 24) * 24;
-    if (canonical === "clan_totem" && (buildX < 200 || buildY < 200 || buildX > WORLD.width - 200 || buildY > WORLD.height - 200)) return { ok: false, reason: "safe-zone" };
+    if (canonical === "clan_totem") {
+      const halfWidth = (definition.footprint?.width || 0) / 2;
+      const halfHeight = (definition.footprint?.height || 0) / 2;
+      const safeEdge = 200;
+      const overlapsSafePerimeter = buildX - halfWidth <= safeEdge || buildY - halfHeight <= safeEdge ||
+        buildX + halfWidth >= WORLD.width - safeEdge || buildY + halfHeight >= WORLD.height - safeEdge;
+      if (overlapsSafePerimeter) return { ok: false, reason: "safe-zone" };
+    }
     const nearby = this.nearbyBuildings(buildX, buildY, 48);
     if (!canOccupy(this.seed, buildX, buildY, WORLD.width, WORLD.height, nearby)) return { ok: false, reason: "blocked-position" };
     const costs = definition?.costs || (canonical === "campfire" ? { wood: 4, stone: 2 } : null);
