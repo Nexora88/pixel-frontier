@@ -7,7 +7,7 @@ export class WorldScene extends Phaser.Scene {
     this.input.keyboard.on("keydown-E",()=>this.gatherNearest());this.input.keyboard.on("keydown-F",()=>this.openNearestChest());
     this.input.on("pointerdown",p=>{if(!this.buildMode||!this.net.connected)return;const q=this.cameras.main.getWorldPoint(p.x,p.y);this.net.emit("world:build",{type:this.buildMode,x:q.x,y:q.y})});
     this.bindNetwork();this.lightingOverlay=this.add.rectangle(0,0,this.scale.width,this.scale.height,0x10152b,0).setOrigin(0).setScrollFactor(0).setDepth(900);
-    this.scale.on("resize",size=>this.lightingOverlay.setSize(size.width,size.height));
+    this.onResize=size=>this.lightingOverlay.setSize(size.width,size.height);this.scale.on("resize",this.onResize);
     this.environmentLabel=this.add.text(12,12,"",{fontFamily:"monospace",fontSize:"11px",color:"#fff",backgroundColor:"#15251dcc",padding:{x:6,y:4}}).setScrollFactor(0).setDepth(1000);
     this.events.once("shutdown",()=>this.cleanup());this.events.once("destroy",()=>this.cleanup());
   }
@@ -39,5 +39,5 @@ export class WorldScene extends Phaser.Scene {
   openNearestChest(){const me=this.players.get(this.localId);if(!me)return;let target=null,best=90;for(const[id,o]of this.renderer.buildingObjects){if(o.type!=="chest")continue;const d=Phaser.Math.Distance.Between(me.body.x,me.body.y,o.shape.x,o.shape.y);if(d<best){best=d;target=id}}if(target)this.net.emit("chest:open",{chestId:target});else this.events.emit("action-result",{ok:false,reason:"no-chest-nearby"})}
   setBuildMode(type){this.buildMode=this.buildMode===type?null:type}
   update(time){if(!this.net.connected)return;const k=this.wasd,c=this.cursors,i={up:k.W.isDown||c.up.isDown,down:k.S.isDown||c.down.isDown,left:k.A.isDown||c.left.isDown,right:k.D.isDown||c.right.isDown},sig=JSON.stringify(i);if(sig!==this.lastInput){this.net.emit("player:input",i);this.lastInput=sig}if(time-this.lastCanopyUpdate>120){const me=this.players.get(this.localId);if(me)this.renderer.updateCanopies(me.body.x,me.body.y);this.lastCanopyUpdate=time}}
-  cleanup(){if(this.cleaned)return;this.cleaned=true;for(const p of this.particles)p.destroy();this.particles.clear();this.players.clear();this.animals.clear();for(const unsubscribe of this.netUnsubs)unsubscribe?.();this.netUnsubs.length=0;this.renderer?.destroy()}
+  cleanup(){if(this.cleaned)return;this.cleaned=true;this.scale.off("resize",this.onResize);for(const p of this.particles)p.destroy();this.particles.clear();this.players.clear();this.animals.clear();for(const unsubscribe of this.netUnsubs)unsubscribe?.();this.netUnsubs.length=0;this.renderer?.destroy()}
 }
