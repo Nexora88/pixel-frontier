@@ -112,7 +112,7 @@ class WorldState {
     const buildX = Math.round(x / 24) * 24, buildY = Math.round(y / 24) * 24;
     if (canonical === "clan_totem" && (buildX < 200 || buildY < 200 || buildX > WORLD.width - 200 || buildY > WORLD.height - 200)) return { ok: false, reason: "safe-zone" };
     const nearby = this.nearbyBuildings(buildX, buildY, 48);
-    if (!canOccupy(this.seed, x, y, WORLD.width, WORLD.height, nearby)) return { ok: false, reason: "blocked-position" };
+    if (!canOccupy(this.seed, buildX, buildY, WORLD.width, WORLD.height, nearby)) return { ok: false, reason: "blocked-position" };
     const costs = definition?.costs || (canonical === "campfire" ? { wood: 4, stone: 2 } : null);
     const used = consumeFromSlots(player.slots, costs);
     if (!used.ok) return used;
