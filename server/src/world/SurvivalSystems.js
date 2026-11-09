@@ -12,7 +12,8 @@ const BUILDINGS = Object.freeze({
   wood_wall: { label: "Wood Wall", category: "building", hp: 200, costs: { wood: 10 }, solid: true },
   stone_wall: { label: "Stone Wall", category: "building", hp: 500, costs: { stone: 20 }, solid: true },
   wood_door: { label: "Wood Door", category: "building", hp: 200, costs: { wood: 20 }, solid: true, access: "owner_or_clan" },
-  chest: { label: "Storage Chest", category: "building", hp: 160, costs: { wood: 8, stone: 2 }, solid: true, storageSlots: 20 }
+  chest: { label: "Storage Chest", category: "building", hp: 160, costs: { wood: 8, stone: 2 }, solid: true, storageSlots: 20 },
+  clan_totem: { label: "Clan Totem", category: "building", hp: 800, costs: { wood: 30, stone: 20 }, solid: true, footprint: { width: 32, height: 64 } }
 });
 const STARTER_SLOTS = 24;
 function emptySlots(size = STARTER_SLOTS) { return Array.from({ length: size }, () => null); }
