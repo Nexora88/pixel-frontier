@@ -4,7 +4,7 @@ Bu belge, Pixel Frontier'ın savaş merkezli olmayan; canlı oyuncuların emek, 
 
 ## 1. İnsan oyuncular ve gerçek topluluk
 
-- Oyuncu listesi, çevrimiçi sayısı, kabile üye sayısı ve pazar etkinliği yalnızca doğrulanmış canlı oyuncu oturumlarından hesaplanır.
+- Oyuncu listesi ve çevrimiçi sayısı yalnızca aktif oyuncu bağlantılarından hesaplanır; bot oyuncu veya sahte nüfus üretilmez. Mevcut bağlantı sistemi tek başına bir oturumun insan olduğunu kanıtlamaz; otomasyon önleme ayrıca tasarlanıp test edilmelidir.
 - Bot hesap, sahte çevrimiçi oyuncu, otomatik pazar satıcısı veya doluluk göstermek için üretilmiş karakter kesinlikle eklenmez.
 - Hayvanlar çevresel vahşi yaşamdır; oyuncu gibi davranmaz, sohbet etmez, ticaret yapmaz, kabile kurmaz ve oyuncu sayısına dahil edilmez.
 - Oyuncu bağlantısı kesildiğinde çevrimiçi sayısından çıkarılır. Kalıcı oyuncu kaydı, çevrimiçi oyuncu olarak gösterilmez.
