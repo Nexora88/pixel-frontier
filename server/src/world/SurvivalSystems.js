@@ -61,7 +61,7 @@ function consumeFromSlots(slots, costs) {
 }
 class ChestStore {
   constructor() { this.chests = new Map(); }
-  register(building) { if (building.type === "chest" || building.type === "storage_chest") this.chests.set(building.id, { ownerId: building.ownerId, clanId: building.clanId || null, slots: emptySlots(BUILDINGS.chest.storageSlots) }); }
+  register(building) { if (building.type === "chest" || building.type === "storage_chest") this.chests.set(building.id, { ownerId: building.ownerId, clanId: building.clanId || null, building, slots: Array.isArray(building.storageSlots) ? building.storageSlots : emptySlots(BUILDINGS.chest.storageSlots) }); }
   canAccess(chest, player) { return !!chest && (chest.ownerId === player.id || (!!chest.clanId && chest.clanId === player.clanId)); }
   transfer(chestId, player, direction, playerSlot, chestSlot, amount) {
     const chest = this.chests.get(chestId); if (!this.canAccess(chest, player)) return { ok: false, reason: "chest-access-denied" };
@@ -80,6 +80,7 @@ class ChestStore {
     else return { ok: false, reason: "slot-unavailable" };
     if (sourceCopy[from] && sourceCopy[from].item === item) { sourceCopy[from].quantity -= count; if (sourceCopy[from].quantity <= 0) sourceCopy[from] = null; }
     source.splice(0, source.length, ...sourceCopy); target.splice(0, target.length, ...targetCopy);
+    chest.building.storageSlots = chest.slots;
     return { ok: true, playerSlots: player.slots, chestSlots: chest.slots };
   }
 }
