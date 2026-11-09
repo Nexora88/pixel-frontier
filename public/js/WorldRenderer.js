@@ -38,7 +38,7 @@ export class WorldRenderer {
     const fill=totem?this.colorFor(b.clanId):b.type==="stone_wall"?0x858b91:wall?0x98734d:b.type==="wood_door"?0x7c5438:b.type==="chest"?0x9b7047:0xf08b43;
     const shape=this.scene.add.rectangle(b.x,b.y,totem?32:wall?34:28,totem?64:wall?13:25,fill).setStrokeStyle(2,0x30291e).setDepth(b.y+(totem?32:13));
     const shadow=this.scene.add.ellipse(b.x,b.y+8,totem?25:30,8,0x17251b,.3).setDepth(b.y-2);
-    const glow=b.type==="campfire"||totem?this.scene.add.circle(b.x,b.y,totem?22:7,totem?fill:0xffd17a,totem?.12:1).setDepth(b.y+1):null;
+    const glow=b.type==="campfire"||totem?this.scene.add.circle(b.x,b.y,totem?22:7,totem?fill:0xffd17a,totem ? 0.12 : 1).setDepth(b.y+1):null;
     this.buildingObjects.set(b.id,{shape,shadow,glow,chunkKey:b.chunkKey,type:b.type});
   }
   addBuildings(items){items.forEach(b=>this.addBuilding(b))}
