@@ -76,12 +76,12 @@ class TerritorySystem {
     for (const territory of this.snapshot()) {
       areas.set(territory.clanId, (areas.get(territory.clanId) || 0) + TERRITORY_SIZE * TERRITORY_SIZE);
     }
-    const total = [...areas.values()].reduce((sum, value) => sum + value, 0);
+    const mapArea = WORLD.width * WORLD.height;
     this.cachedDominance = [...areas.entries()]
       .map(([clanId, area]) => ({
         clanId,
         clanName: this.social.clans.get(clanId)?.name || "Unknown clan",
-        dominance: total ? Math.min(100, Math.round(area / total * 100)) : 0,
+        dominance: Math.min(100, Math.round(area / mapArea * 100)),
         claimedArea: area
       }))
       .sort((a, b) => b.claimedArea - a.claimedArea)
