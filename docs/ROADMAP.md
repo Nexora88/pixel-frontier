@@ -1,32 +1,28 @@
 # 90-Day Roadmap
 
-Scope plan; unchecked items are not implemented.
-
-## Month 1 — Playable foundation
+Implemented in the current development branch:
 - [x] Node/Express/Socket.io server and server-authoritative movement
-- [x] Deterministic gathering and starter inventory
 - [x] Directional pixel survivor animations
-- [x] Seeded forest, lake, mountain and meadow biome generation
-- [x] Biome-specific resource tables and movement metadata
-- [x] 3×3 chunk interest management, chunk load/unload and scoped world deltas
-- [x] Server-owned item catalog and validated crafting recipes
-- [x] Expanded structures: walls, campfires, doors and chests
-- [ ] PostgreSQL persistence
+- [x] Seeded forest, lake, mountain and meadow biomes with biome resources
+- [x] 3×3 chunk interest management and scoped deltas
+- [x] 24-slot server-authoritative inventory and stack-aware movement
+- [x] Primitive starter tool and wooden axe/pickaxe crafting
+- [x] Wood/stone walls, owner/clan doors and private chest storage
+- [x] PostgreSQL migrations for players, chunks, structures, clans, trades and world clock
+- [x] Signed anonymous session token and reconnect restoration
+- [x] Biome movement modifiers, blocked terrain and structure collision
+- [x] Server-driven day/night, weather state and basic wildlife wandering
+- [x] Clan membership and validated barter settlement
 
-## Month 2 — Survival and settlement
-- [ ] Inventory slots, stack limits, transfer UI and chest storage permissions
-- [ ] Crafting stations, progression, placement preview and collision
-- [ ] Hunger, rest, health and survival pressure
-- [ ] Day/night, weather, wildlife and resource regeneration
-- [ ] Save migrations and backup/restore tests
+## Remaining milestones
+- [ ] Live PostgreSQL deployment verification with production credentials and backup/restore drill
+- [ ] Browser visual QA and two-device multiplayer playtest
+- [ ] Resource regeneration, animal behavior/interaction and richer weather visuals
+- [ ] Building placement preview, rotation, damage/repair and more detailed door controls
+- [ ] Account recovery, moderation, invite-based clan permissions and offline trade escrow
+- [ ] Hunger, rest, health and non-combat survival pressure
+- [ ] Protected starter regions, anti-camping and fair competitive rules
+- [ ] Load tests, abuse/rate-limit tests, observability and production runbook
 
-## Month 3 — Shared-world identity
-- [ ] Account/session authentication and reconnect recovery
-- [ ] Persistent chunk snapshots and region migrations
-- [ ] Party, clan and settlement permissions
-- [ ] Player trade board and economy sinks
-- [ ] Protected regions, anti-camping and fair competitive rules
-- [ ] Load tests, abuse/rate-limit tests, observability and deployment runbook
-
-## Exit criteria
-A small group can gather, craft and establish a settlement, reconnect without losing progress, and play without whole-world broadcasts.
+## Performance exit criteria
+Nearby chunk subscriptions remain bounded; no full-world broadcast is introduced. Capacity claims require repeatable load tests and profiling.
