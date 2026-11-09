@@ -12,7 +12,8 @@ export class WorldScene extends Phaser.Scene {
     this.events.once("shutdown",()=>this.cleanup());this.events.once("destroy",()=>this.cleanup());
   }
   createPlayerAnimations(){["down","left","right","up"].forEach((d,row)=>this.anims.create({key:`survivor-walk-${d}`,frames:this.anims.generateFrameNumbers("survivor",{start:row*4,end:row*4+3}),frameRate:8,repeat:-1}))}
-  listen(event,handler){this.netUnsubs.push(this.net.on(event,handler))}\n  bindNetwork(){
+  listen(event,handler){this.netUnsubs.push(this.net.on(event,handler))}
+  bindNetwork(){
     this.listen("world:init",d=>{this.localId=d.ownId;this.localClanId=d.players.find(p=>p.id===this.localId)?.clanId||null;this.cameras.main.setBounds(0,0,d.world.width,d.world.height);this.renderer.drawGround(d.world.width,d.world.height,d.worldState.seed);d.worldState.chunks.forEach(c=>this.renderer.addChunk(c));d.players.forEach(p=>this.upsert(p));this.renderer.setTerritories(d.territories||[]);const me=this.players.get(this.localId);if(me)this.cameras.main.startFollow(me.body,true,.12,.12);this.updateEnvironment(d.environment);this.events.emit("ready",d);if(d.inventory)this.events.emit("inventory",d.inventory)});
     this.listen("world:chunk:load",c=>this.renderer.addChunk(c));this.listen("world:chunk:unload",({key})=>this.renderer.removeChunk(key));this.listen("player:joined",p=>this.upsert(p));this.listen("player:left",({id})=>this.remove(id));
     this.listen("world:state",({players,environment,animals=[],spawnProtected})=>{const visible=new Set(players.map(p=>p.id));players.forEach(p=>this.upsert(p));for(const id of this.players.keys())if(id!==this.localId&&!visible.has(id))this.remove(id);this.updateEnvironment(environment);this.updateAnimals(animals);this.events.emit("spawn-protection",!!spawnProtected)});
