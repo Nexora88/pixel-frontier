@@ -1,0 +1,3 @@
+const test=require("node:test"),assert=require("node:assert/strict");const{signPlayerToken,verifyPlayerToken}=require("../server/src/game/SessionIdentity");
+test("signed player tokens verify and preserve stable identity",()=>{const id="123e4567-e89b-12d3-a456-426614174000",secret="test-secret",token=signPlayerToken(id,secret);assert.equal(verifyPlayerToken(token,secret),id);assert.equal(verifyPlayerToken(token,"wrong-secret"),null)});
+test("malformed and altered player tokens are rejected",()=>{assert.equal(verifyPlayerToken("bad.token","secret"),null);const token=signPlayerToken("123e4567-e89b-12d3-a456-426614174000","secret");assert.equal(verifyPlayerToken(token+"x","secret"),null)});
