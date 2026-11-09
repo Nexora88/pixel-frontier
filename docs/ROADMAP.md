@@ -1,37 +1,32 @@
 # 90-Day Roadmap
 
-This is a scope plan, not a claim that every feature is already implemented. Each phase ends with a playable, testable milestone.
+Scope plan; unchecked items are not implemented.
 
 ## Month 1 — Playable foundation
-- [x] Node/Express/Socket.io server skeleton
-- [x] Server-authoritative movement and player lifecycle
-- [x] Deterministic starter resource field
-- [x] Basic gathering, inventory counters and two build recipes
-- [x] CI and unit-test baseline
-- [x] First directional pixel survivor sprite sheet and movement animations
-- [ ] Procedural biomes and region generation
-- [ ] Chunk subscriptions and interest management
-- [ ] PostgreSQL player/world persistence
+- [x] Node/Express/Socket.io server and server-authoritative movement
+- [x] Deterministic gathering and starter inventory
+- [x] Directional pixel survivor animations
+- [x] Seeded forest, lake, mountain and meadow biome generation
+- [x] Biome-specific resource tables and movement metadata
+- [x] 3×3 chunk interest management, chunk load/unload and scoped world deltas
+- [x] Server-owned item catalog and validated crafting recipes
+- [x] Expanded structures: walls, campfires, doors and chests
+- [ ] PostgreSQL persistence
 
 ## Month 2 — Survival and settlement
-- [ ] Inventory slots, item definitions and stack rules
-- [ ] Crafting stations and recipe progression
-- [ ] Placement preview, rotation, collision and ownership
-- [ ] Storage, repair and structure durability
-- [ ] Hunger, rest, health and non-combat survival pressure
-- [ ] Day/night and weather simulation
-- [ ] Wildlife and resource regeneration
+- [ ] Inventory slots, stack limits, transfer UI and chest storage permissions
+- [ ] Crafting stations, progression, placement preview and collision
+- [ ] Hunger, rest, health and survival pressure
+- [ ] Day/night, weather, wildlife and resource regeneration
 - [ ] Save migrations and backup/restore tests
 
 ## Month 3 — Shared-world identity
 - [ ] Account/session authentication and reconnect recovery
-- [ ] Region persistence and server-side interest management
+- [ ] Persistent chunk snapshots and region migrations
 - [ ] Party, clan and settlement permissions
 - [ ] Player trade board and economy sinks
-- [ ] Protected regions and fair competitive rules
-- [ ] Load tests, abuse/rate-limit tests and observability
-- [ ] Deployment runbook and production monitoring
-- [ ] Closed playtest and balance pass
+- [ ] Protected regions, anti-camping and fair competitive rules
+- [ ] Load tests, abuse/rate-limit tests, observability and deployment runbook
 
 ## Exit criteria
-A small group can join one world, gather and craft, establish a settlement, disconnect and reconnect without losing progress, and play without the server broadcasting the entire world to every client.
+A small group can gather, craft and establish a settlement, reconnect without losing progress, and play without whole-world broadcasts.
