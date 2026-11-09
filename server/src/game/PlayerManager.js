@@ -5,7 +5,7 @@ const { emptySlots, addToSlots, slotCounts, canOccupy } = require("../world/Surv
 const COLORS = [0x55c2ff, 0xd99aff, 0x7ed957, 0xffc857, 0xff7d87, 0xf1eee5];
 
 class PlayerManager {
-  constructor() { this.players = new Map(); }
+  constructor() { this.players = new Map(); this.playersByChunk = new Map(); }\n  chunkKey(x,y) { return `${Math.floor(x / WORLD.chunkSize)},${Math.floor(y / WORLD.chunkSize)}`; }\n  indexPlayer(player) { player.chunkKey = this.chunkKey(player.x,player.y); if(!this.playersByChunk.has(player.chunkKey))this.playersByChunk.set(player.chunkKey,new Map()); this.playersByChunk.get(player.chunkKey).set(player.id,player); }\n  visibleTo(player) { const visible=new Map([[player.id,player]]); for(const key of player.subscribedChunks){const bucket=this.playersByChunk.get(key);if(bucket)for(const [id,other] of bucket)visible.set(id,other);} return [...visible.values()]; }
   add(id, socketId, restored, world) {
     const seed = world?.seed || WORLD.seed;
     let spawn = { x: restored?.x, y: restored?.y };
@@ -36,7 +36,7 @@ class PlayerManager {
     this.players.set(id, player);
     return player;
   }
-  remove(id) { return this.players.delete(id); }
+  remove(id) { const player=this.players.get(id);if(!player)return false;const bucket=this.playersByChunk.get(player.chunkKey);bucket?.delete(id);if(bucket?.size===0)this.playersByChunk.delete(player.chunkKey);return this.players.delete(id); }
   get(id) { return this.players.get(id); }
   getBySocket(socketId) { for (const player of this.players.values()) if (player.socketId === socketId) return player; return null; }
   publicPlayers(players = this.players.values(), ownerId = null) {
@@ -60,7 +60,7 @@ class PlayerManager {
       const collisionBuildings = nearby.filter(building =>
         !(building.type === "wood_door" && (building.ownerId === player.id || (building.clanId && building.clanId === player.clanId))));
       if (canOccupy(world?.seed || WORLD.seed, nextX, player.y, WORLD.width, WORLD.height, collisionBuildings)) player.x = nextX;
-      if (canOccupy(world?.seed || WORLD.seed, player.x, nextY, WORLD.width, WORLD.height, collisionBuildings)) player.y = nextY;
+      if (canOccupy(world?.seed || WORLD.seed, player.x, nextY, WORLD.width, WORLD.height, collisionBuildings)) player.y = nextY;\n      const nextChunkKey=this.chunkKey(player.x,player.y);if(nextChunkKey!==player.chunkKey){const oldBucket=this.playersByChunk.get(player.chunkKey);oldBucket?.delete(player.id);if(oldBucket?.size===0)this.playersByChunk.delete(player.chunkKey);player.chunkKey=nextChunkKey;if(!this.playersByChunk.has(nextChunkKey))this.playersByChunk.set(nextChunkKey,new Map());this.playersByChunk.get(nextChunkKey).set(player.id,player);}
     }
   }
 }
