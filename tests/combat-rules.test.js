@@ -1,0 +1,3 @@
+const test=require("node:test");const assert=require("node:assert/strict");const{sameSide,canDamage}=require("../server/src/game/CombatRules");
+test("blocks friendly fire for clan and faction members",()=>{assert.equal(sameSide({clanId:"c"},{clanId:"c"}),true);assert.equal(canDamage({id:"a",clanId:"c"},{id:"b",clanId:"c"}),false);assert.equal(canDamage({id:"a",factionId:"red"},{id:"b",factionId:"red"}),false)});
+test("allows enemy damage only outside safe zones and never self damage",()=>{assert.equal(canDamage({id:"a",clanId:"c1"},{id:"b",clanId:"c2"}),true);assert.equal(canDamage({id:"a"},{id:"a"}),false);assert.equal(canDamage({id:"a"},{id:"b"},{safeZone:true}),false)});
