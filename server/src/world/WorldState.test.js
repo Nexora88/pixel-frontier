@@ -8,5 +8,5 @@ test("clan totems require clan membership and cannot be placed in the protected 
   assert.equal(world.build(player, "clan_totem", 100, 100).reason, "clan-required");
   player.clanId = "clan-1";
   player.x = 205; player.y = 500;
-  assert.equal(world.build(player, "clan_totem", 205, 500).reason, "safe-zone");
+  assert.equal(world.build(player, "clan_totem", 205, 500).reason, "safe-zone");\n  assert.equal(world.build(player, "clan_totem", 3000, 500).reason, "safe-zone");\n  assert.equal(world.build(player, "clan_totem", 500, 205).reason, "safe-zone");
 });
