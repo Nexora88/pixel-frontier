@@ -12,7 +12,7 @@ async handleConnection(s){
 if(this.players.players.size>=GAME.maxPlayers){s.emit("server:full");s.disconnect(true);return}
 const playerId=s.data.playerId;if(!playerId){s.disconnect(true);return}
 const existing=this.players.get(playerId);if(existing){const oldSocket=this.io.sockets.sockets.get(existing.socketId);if(oldSocket)oldSocket.disconnect(true);this.players.remove(playerId)}
-const saved=this.persistence?.enabled?await this.persistence.loadPlayer(playerId):null,p=this.players.add(playerId,s.id,saved);
+const saved=this.persistence?.enabled?await this.persistence.loadPlayer(playerId):null,p=this.players.add(playerId,s.id,saved,this.world);
 s.emit("session:token",s.data.sessionToken);
 const initial=this.world.getNearbyChunks(p.x,p.y);
 s.emit("world:init",{ownId:p.id,world:{width:WORLD.width,height:WORLD.height,chunkSize:WORLD.chunkSize},players:this.players.publicPlayers(this.visiblePlayers(p)),worldState:{seed:this.world.seed,chunks:initial},environment:this.environment.snapshot(),inventory:{slots:p.slots,equipment:p.equipment,inventory:p.inventory}});
@@ -33,6 +33,6 @@ s.on("world:environment",()=>s.emit("world:environment",this.environment.snapsho
 s.on("disconnect",()=>{this.notifyVisible("player:left",{id:p.id},p);if(this.persistence?.enabled)this.persistence.savePlayer(p).catch(()=>{});if(this.players.get(p.id)?.socketId===s.id)this.players.remove(p.id)});
 }
 validInput(i){return!!i&&typeof i==="object"&&["up","down","left","right"].every(k=>typeof i[k]==="boolean")}
-tick(){this.players.update(GAME.tickMs/1000,GAME.playerSpeed,this.world);for(const p of this.players.players.values()){const s=this.io.sockets.sockets.get(p.socketId);if(s)this.syncChunks(p,s)}const now=Date.now();if(this.persistence?.enabled&&now-this.lastSaveAt>15000){this.lastSaveAt=now;this.save().catch(err=>console.error("Persistence save failed:",err.message))}if(now-this.lastSnapshotAt<GAME.snapshotMs)return;this.lastSnapshotAt=now;const environment=this.environment.snapshot(now);for(const p of this.players.players.values()){const s=this.io.sockets.sockets.get(p.socketId);if(s)s.emit("world:state",{players:this.players.publicPlayers(this.visiblePlayers(p)),serverTime:now,environment,animals:this.environment.nearbyAnimals(p.x,p.y)})}}
+tick(){this.players.update(GAME.tickMs/1000,GAME.playerSpeed,this.world);for(const p of this.players.players.values()){const s=this.io.sockets.sockets.get(p.socketId);if(s)this.syncChunks(p,s)}this.environment.update(GAME.tickMs/1000);const now=Date.now();if(this.persistence?.enabled&&now-this.lastSaveAt>15000){this.lastSaveAt=now;this.save().catch(err=>console.error("Persistence save failed:",err.message))}if(now-this.lastSnapshotAt<GAME.snapshotMs)return;this.lastSnapshotAt=now;const environment=this.environment.snapshot(now);for(const p of this.players.players.values()){const s=this.io.sockets.sockets.get(p.socketId);if(s)s.emit("world:state",{players:this.players.publicPlayers(this.visiblePlayers(p)),serverTime:now,environment,animals:this.environment.nearbyAnimals(p.x,p.y)})}}
 }
 module.exports={GameServer};
