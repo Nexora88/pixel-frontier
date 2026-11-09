@@ -106,7 +106,7 @@ class PlayerManager {
       const factor = (BIOMES[biome]?.movement || 1) * (weather === "rain" ? 0.9 : 1);
       const nextX = player.x + dx * speed * factor * dt;
       const nextY = player.y + dy * speed * factor * dt;
-      const nearby = world?.nearbyBuildings ? world.nearbyBuildings(player.x, player.y, 48) : [];
+      const nearby = world?.nearbyBuildings ? world.nearbyBuildings(player.x, player.y, 48) : [...(world?.buildings?.values() || [])];
       const collisionBuildings = nearby.filter(building =>
         !(building.type === "wood_door" &&
           (building.ownerId === player.id || (building.clanId && building.clanId === player.clanId))));
