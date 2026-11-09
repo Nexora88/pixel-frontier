@@ -1,0 +1,3 @@
+const test=require("node:test");const assert=require("node:assert/strict");const{LobbyManager}=require("../server/src/game/LobbyManager");
+test("allocates at most 60 players per world and creates another when full",()=>{const m=new LobbyManager({capacity:60});for(let i=0;i<60;i++)assert.equal(m.allocate("p"+i).lobbyId,"world_1");const next=m.allocate("p60");assert.equal(next.lobbyId,"world_2");assert.deepEqual(m.summary().map(x=>x.count),[60,1])});
+test("allocation is idempotent and empty lobbies are reclaimed",()=>{const m=new LobbyManager({capacity:2});const a=m.allocate("p1");assert.equal(m.allocate("p1").lobbyId,a.lobbyId);assert.equal(m.release("p1"),true);assert.equal(m.summary().length,0)});
