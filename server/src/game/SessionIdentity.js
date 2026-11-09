@@ -1,0 +1,4 @@
+const crypto=require("node:crypto");
+function signPlayerToken(playerId,secret){const payload=Buffer.from(JSON.stringify({sub:playerId})).toString("base64url"),signature=crypto.createHmac("sha256",secret).update(payload).digest("base64url");return `${payload}.${signature}`}
+function verifyPlayerToken(token,secret){if(typeof token!=="string"||token.length>512)return null;const parts=token.split(".");if(parts.length!==2)return null;const expected=crypto.createHmac("sha256",secret).update(parts[0]).digest();let supplied;try{supplied=Buffer.from(parts[1],"base64url")}catch{return null}if(supplied.length!==expected.length||!crypto.timingSafeEqual(supplied,expected))return null;try{const data=JSON.parse(Buffer.from(parts[0],"base64url").toString());return typeof data.sub==="string"&&/^[a-f0-9-]{36}$/i.test(data.sub)?data.sub:null}catch{return null}}
+module.exports={signPlayerToken,verifyPlayerToken};

@@ -1,1 +1,5 @@
-const test=require("node:test"),assert=require("node:assert/strict"),{generateResources}=require("../server/src/world/generateWorld");test("generation is deterministic for a seed",()=>assert.deepEqual(generateResources("seed"),generateResources("seed")));test("resource nodes stay inside world bounds",()=>{const a=generateResources("bounds");assert.equal(a.length,260);assert.ok(a.every(x=>x.x>=100&&x.x<=3100&&x.y>=100&&x.y<=2300))});
+const test=require("node:test"),assert=require("node:assert/strict");const{generateResources,generateChunk,getBiomeAt}=require("../server/src/world/generateWorld");
+test("chunk generation is deterministic for seed and coordinate",()=>assert.deepEqual(generateChunk("seed",2,1),generateChunk("seed",2,1)));
+test("resource nodes remain within their chunk",()=>{const c=generateChunk("bounds",3,2);assert.ok(c.resources.every(r=>r.x>=c.x&&r.x<=c.x+c.width&&r.y>=c.y&&r.y<=c.y+c.height))});
+test("world resource ids are unique and bounded",()=>{const a=generateResources("bounds");assert.equal(new Set(a.map(r=>r.id)).size,a.length);assert.ok(a.every(r=>r.x>=0&&r.x<=3200&&r.y>=0&&r.y<=2400))});
+test("biome selector returns supported biome",()=>assert.ok(["forest","lake","mountain","meadow"].includes(getBiomeAt("seed",200,200))));

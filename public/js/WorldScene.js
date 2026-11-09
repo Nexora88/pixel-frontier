@@ -1,150 +1,22 @@
-import { WorldRenderer } from "./WorldRenderer.js";
-
-export class WorldScene extends Phaser.Scene {
-  constructor(net) {
-    super("WorldScene");
-    this.net = net;
-    this.players = new Map();
-    this.localId = null;
-    this.lastInput = "";
-    this.buildMode = null;
-  }
-
-  preload() {
-    this.load.spritesheet("survivor", "/assets/survivor.svg", {
-      frameWidth: 16,
-      frameHeight: 16
-    });
-  }
-
-  create() {
-    this.createPlayerAnimations();
-    this.renderer = new WorldRenderer(this);
-    this.cursors = this.input.keyboard.createCursorKeys();
-    this.wasd = this.input.keyboard.addKeys("W,A,S,D");
-    this.input.keyboard.on("keydown-E", () => this.gatherNearest());
-    this.input.on("pointerdown", p => {
-      if (!this.buildMode || !this.net.connected) return;
-      const q = this.cameras.main.getWorldPoint(p.x, p.y);
-      this.net.emit("world:build", { type: this.buildMode, x: q.x, y: q.y });
-    });
-    this.bindNetwork();
-  }
-
-  createPlayerAnimations() {
-    const directions = ["down", "left", "right", "up"];
-    directions.forEach((direction, row) => {
-      this.anims.create({
-        key: `survivor-walk-${direction}`,
-        frames: this.anims.generateFrameNumbers("survivor", {
-          start: row * 4,
-          end: row * 4 + 3
-        }),
-        frameRate: 8,
-        repeat: -1
-      });
-    });
-  }
-
-  bindNetwork() {
-    this.net.on("world:init", d => {
-      this.localId = d.ownId;
-      this.cameras.main.setBounds(0, 0, d.world.width, d.world.height);
-      this.renderer.drawGround(d.world.width, d.world.height, d.worldState.seed);
-      this.renderer.addResources(d.worldState.resources);
-      this.renderer.addBuildings(d.worldState.buildings);
-      d.players.forEach(p => this.upsert(p));
-      const me = this.players.get(this.localId);
-      if (me) this.cameras.main.startFollow(me.body, true, 0.12, 0.12);
-      this.events.emit("ready", d);
-    });
-    this.net.on("player:joined", p => this.upsert(p));
-    this.net.on("player:left", ({ id }) => this.remove(id));
-    this.net.on("world:state", ({ players }) => players.forEach(p => this.upsert(p)));
-    this.net.on("world:resource:removed", ({ id }) => this.renderer.removeResource(id));
-    this.net.on("world:building:placed", b => this.renderer.addBuilding(b));
-    this.net.on("world:gather:result", r => this.events.emit("action-result", r));
-    this.net.on("world:build:result", r => this.events.emit("action-result", r));
-  }
-
-  upsert(d) {
-    let p = this.players.get(d.id);
-    if (!p) {
-      const body = this.add.sprite(d.x, d.y, "survivor", 0)
-        .setOrigin(0.5, 0.78)
-        .setDepth(10);
-      const label = this.add.text(d.x, d.y - 23, d.id === this.localId ? "YOU" : "SURVIVOR", {
-        fontSize: "10px",
-        color: "#fff",
-        backgroundColor: "#142018",
-        padding: { x: 3, y: 2 }
-      }).setOrigin(0.5).setDepth(11);
-      p = { body, label, x: d.x, y: d.y, direction: "down" };
-      this.players.set(d.id, p);
-    }
-
-    const dx = d.x - p.x;
-    const dy = d.y - p.y;
-    const moving = Math.abs(dx) + Math.abs(dy) > 0.25;
-    if (moving) {
-      if (Math.abs(dx) > Math.abs(dy)) p.direction = dx < 0 ? "left" : "right";
-      else p.direction = dy < 0 ? "up" : "down";
-      const animation = `survivor-walk-${p.direction}`;
-      if (p.body.anims.currentAnim?.key !== animation) p.body.play(animation, true);
-    } else {
-      p.body.anims.stop();
-      p.body.setFrame(({ down: 0, left: 4, right: 8, up: 12 })[p.direction]);
-    }
-
-    p.body.setPosition(d.x, d.y);
-    p.label.setPosition(d.x, d.y - 23);
-    p.x = d.x;
-    p.y = d.y;
-    if (d.id === this.localId) this.events.emit("inventory", d.inventory);
-  }
-
-  remove(id) {
-    const p = this.players.get(id);
-    if (!p) return;
-    p.body.destroy();
-    p.label.destroy();
-    this.players.delete(id);
-  }
-
-  gatherNearest() {
-    const me = this.players.get(this.localId);
-    if (!me) return;
-    let target = null;
-    let best = 78;
-    for (const [id, object] of this.renderer.resourceObjects) {
-      const distance = Phaser.Math.Distance.Between(me.body.x, me.body.y, object.shape.x, object.shape.y);
-      if (distance < best) {
-        best = distance;
-        target = id;
-      }
-    }
-    if (target) this.net.emit("world:gather", { resourceId: target });
-    else this.events.emit("action-result", { ok: false, reason: "no-resource-nearby" });
-  }
-
-  setBuildMode(type) {
-    this.buildMode = this.buildMode === type ? null : type;
-  }
-
-  update() {
-    if (!this.net.connected) return;
-    const k = this.wasd;
-    const c = this.cursors;
-    const input = {
-      up: k.W.isDown || c.up.isDown,
-      down: k.S.isDown || c.down.isDown,
-      left: k.A.isDown || c.left.isDown,
-      right: k.D.isDown || c.right.isDown
-    };
-    const encoded = JSON.stringify(input);
-    if (encoded !== this.lastInput) {
-      this.net.emit("player:input", input);
-      this.lastInput = encoded;
-    }
-  }
+import{WorldRenderer}from"./WorldRenderer.js";
+export class WorldScene extends Phaser.Scene{
+constructor(net){super("WorldScene");this.net=net;this.players=new Map();this.localId=null;this.lastInput="";this.buildMode=null;this.animals=new Map()}
+preload(){this.load.spritesheet("survivor","/assets/survivor.svg",{frameWidth:16,frameHeight:16});this.load.spritesheet("items","/assets/items.svg",{frameWidth:16,frameHeight:16})}
+create(){this.createPlayerAnimations();this.renderer=new WorldRenderer(this);this.cursors=this.input.keyboard.createCursorKeys();this.wasd=this.input.keyboard.addKeys("W,A,S,D");this.input.keyboard.on("keydown-E",()=>this.gatherNearest());this.input.keyboard.on("keydown-F",()=>this.openNearestChest());this.input.on("pointerdown",p=>{if(!this.buildMode||!this.net.connected)return;const q=this.cameras.main.getWorldPoint(p.x,p.y);this.net.emit("world:build",{type:this.buildMode,x:q.x,y:q.y})});this.bindNetwork();this.lightingOverlay=this.add.rectangle(0,0,this.scale.width,this.scale.height,0x10152b,0).setOrigin(0).setScrollFactor(0).setDepth(900);this.scale.on("resize",size=>this.lightingOverlay.setSize(size.width,size.height));this.environmentLabel=this.add.text(12,12,"",{fontSize:"11px",color:"#fff",backgroundColor:"#15251dcc",padding:{x:6,y:4}}).setScrollFactor(0).setDepth(1000)}
+createPlayerAnimations(){["down","left","right","up"].forEach((d,row)=>this.anims.create({key:`survivor-walk-${d}`,frames:this.anims.generateFrameNumbers("survivor",{start:row*4,end:row*4+3}),frameRate:8,repeat:-1}))}
+bindNetwork(){
+this.net.on("world:init",d=>{this.localId=d.ownId;this.cameras.main.setBounds(0,0,d.world.width,d.world.height);this.renderer.drawGround(d.world.width,d.world.height,d.worldState.seed);d.worldState.chunks.forEach(c=>this.renderer.addChunk(c));d.players.forEach(p=>this.upsert(p));const me=this.players.get(this.localId);if(me)this.cameras.main.startFollow(me.body,true,.12,.12);this.updateEnvironment(d.environment);this.events.emit("ready",d);if(d.inventory)this.events.emit("inventory",d.inventory)});
+this.net.on("world:chunk:load",c=>this.renderer.addChunk(c));this.net.on("world:chunk:unload",({key})=>this.renderer.removeChunk(key));this.net.on("player:joined",p=>this.upsert(p));this.net.on("player:left",({id})=>this.remove(id));
+this.net.on("world:state",({players,environment,animals=[]})=>{const visible=new Set(players.map(p=>p.id));players.forEach(p=>this.upsert(p));for(const id of this.players.keys())if(id!==this.localId&&!visible.has(id))this.remove(id);this.updateEnvironment(environment);this.updateAnimals(animals)});
+this.net.on("world:resource:removed",({id})=>this.renderer.removeResource(id));this.net.on("world:building:placed",b=>{this.renderer.addBuilding(b);this.events.emit("building",b)});
+for(const e of ["world:gather:result","world:build:result","world:craft:result","inventory:result","equipment:result","chest:result","chest:opened","clan:result","trade:result"])this.net.on(e,r=>this.events.emit("action-result",{...r,event:e}));
+}
+updateEnvironment(data){if(!this.environmentLabel||!data)return;this.environmentLabel.setText(`DAY ${data.day} · ${String(data.hour).padStart(2,"0")}:00 · ${data.weather.toUpperCase()}`);this.environmentLabel.setColor(data.isNight?"#b9c8ff":"#fff1c2");this.lightingOverlay.setFillStyle(0x10152b,data.isNight?0.32:0);}
+updateAnimals(items){const visible=new Set(items.map(a=>a.id));for(const[id,o]of this.animals)if(!visible.has(id)){o.destroy();this.animals.delete(id)}for(const a of items){if(!this.animals.has(a.id)){const color=a.species==="duck"?0x8fc6d4:a.species==="rabbit"?0xd6c6a8:0x9eaa8b;this.animals.set(a.id,this.add.circle(a.x,a.y,5,color).setStrokeStyle(1,0x26332a).setDepth(6))}this.animals.get(a.id).setPosition(a.x,a.y)}}
+upsert(d){let p=this.players.get(d.id);if(!p){const body=this.add.sprite(d.x,d.y,"survivor",0).setOrigin(.5,.78).setDepth(10),label=this.add.text(d.x,d.y-23,d.id===this.localId?"YOU":"SURVIVOR",{fontSize:"10px",color:"#fff",backgroundColor:"#142018",padding:{x:3,y:2}}).setOrigin(.5).setDepth(11);const tool=this.add.sprite(d.x+8,d.y+1,"items",12).setScale(1.1).setDepth(12);p={body,label,tool,x:d.x,y:d.y,direction:"down"};this.players.set(d.id,p)}const dx=d.x-p.x,dy=d.y-p.y,moving=Math.abs(dx)+Math.abs(dy)>.25;if(moving){if(Math.abs(dx)>Math.abs(dy))p.direction=dx<0?"left":"right";else p.direction=dy<0?"up":"down";const a=`survivor-walk-${p.direction}`;if(p.body.anims.currentAnim?.key!==a)p.body.play(a,true)}else{p.body.anims.stop();p.body.setFrame(({down:0,left:4,right:8,up:12})[p.direction])}p.body.setPosition(d.x,d.y);p.label.setPosition(d.x,d.y-23);const toolFrames={primitive_stone:12,wooden_axe:13,wooden_pickaxe:14,advanced_pickaxe:14,iron_sword:13};if(d.equipment?.tool&&p.tool){p.tool.setFrame(toolFrames[d.equipment.tool]??12).setPosition(d.x+8,d.y+1).setVisible(true)}else if(p.tool)p.tool.setVisible(false);p.x=d.x;p.y=d.y;if(d.id===this.localId){const signature=JSON.stringify([d.inventory,d.slots,d.equipment]);if(signature!==p.inventorySignature){p.inventorySignature=signature;this.events.emit("inventory",{inventory:d.inventory,slots:d.slots,equipment:d.equipment})}}}
+remove(id){const p=this.players.get(id);if(!p)return;p.body.destroy();p.label.destroy();p.tool?.destroy();this.players.delete(id)}
+gatherNearest(){const me=this.players.get(this.localId);if(!me)return;let target=null,best=78;for(const[id,o]of this.renderer.resourceObjects){const d=Phaser.Math.Distance.Between(me.body.x,me.body.y,o.shape.x,o.shape.y);if(d<best){best=d;target=id}}if(target)this.net.emit("world:gather",{resourceId:target});else this.events.emit("action-result",{ok:false,reason:"no-resource-nearby"})}
+openNearestChest(){const me=this.players.get(this.localId);if(!me)return;let target=null,best=90;for(const[id,o]of this.renderer.buildingObjects){if(o.type!=="chest")continue;const d=Phaser.Math.Distance.Between(me.body.x,me.body.y,o.shape.x,o.shape.y);if(d<best){best=d;target=id}}if(target)this.net.emit("chest:open",{chestId:target});else this.events.emit("action-result",{ok:false,reason:"no-chest-nearby"})}
+setBuildMode(type){this.buildMode=this.buildMode===type?null:type}
+update(){if(!this.net.connected)return;const k=this.wasd,c=this.cursors,i={up:k.W.isDown||c.up.isDown,down:k.S.isDown||c.down.isDown,left:k.A.isDown||c.left.isDown,right:k.D.isDown||c.right.isDown},e=JSON.stringify(i);if(e!==this.lastInput){this.net.emit("player:input",i);this.lastInput=e}}
 }
