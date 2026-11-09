@@ -13,7 +13,9 @@
 - Seeded biome chunks, collision rules, day/night, weather and ambient wildlife.
 - Optional PostgreSQL persistence for player sessions, chunks, structures, clans, trades and world clock.
 - Signed anonymous player sessions that restore inventory and position on reconnect.
-- Multiplayer join/leave, chunk-indexed player visibility and bounded logical Socket.IO lobbies (50 players each).\n- Clan totems, 400×400 territory boundaries, safe-perimeter placement rules and one-second dominance summaries.\n- Pixel depth sorting, translucent tree canopies, short gather particles and explicit Phaser object cleanup.
+- Multiplayer join/leave, chunk-indexed player visibility and bounded logical Socket.IO lobbies (50 players each).
+- Clan totems, 400×400 territory boundaries, safe-perimeter placement rules and one-second dominance summaries.
+- Pixel depth sorting, translucent tree canopies, short gather particles and explicit Phaser object cleanup.
 - Node test runner and GitHub Actions CI.
 
 ## Run locally
@@ -38,7 +40,9 @@ Gather with E. Craft wooden axe or pickaxe from 15 wood. Use the 24-slot backpac
 
 Structures: wood wall (10 wood), stone wall (20 stone), wood door (20 wood), chest (8 wood + 2 stone). Press F near an accessible chest. Clan owners can share their doors and chests with clan members.
 
-For production, configure ALLOWED_ORIGINS as a comma-separated list of exact HTTPS origins. The current lobby allocator is process-local; it does not provide multi-node world sharding. See [docs/SCALING_ARCHITECTURE.md](docs/SCALING_ARCHITECTURE.md) and [docs/PRODUCTION_SECURITY.md](docs/PRODUCTION_SECURITY.md).\n\nPostgreSQL is optional for local prototyping. Without DATABASE_URL the world runs in memory; set DATABASE_URL and a stable SESSION_SECRET to persist player/world data across restarts.
+For production, configure ALLOWED_ORIGINS as a comma-separated list of exact HTTPS origins. The current lobby allocator is process-local; it does not provide multi-node world sharding. See [docs/SCALING_ARCHITECTURE.md](docs/SCALING_ARCHITECTURE.md) and [docs/PRODUCTION_SECURITY.md](docs/PRODUCTION_SECURITY.md).
+
+PostgreSQL is optional for local prototyping. Without DATABASE_URL the world runs in memory; set DATABASE_URL and a stable SESSION_SECRET to persist player/world data across restarts.
 
 ## Structure
 - `public/` — Phaser client and UI
