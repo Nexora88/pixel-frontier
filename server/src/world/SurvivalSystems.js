@@ -97,7 +97,8 @@ class EnvironmentSimulation {
     if (weatherCycle > 0) { const choices = ["clear", "cloudy", "rain"]; this.weather = choices[(Math.floor(now / 180000) + this.seed.length) % choices.length]; this.weatherChangedAt = now; }
     return { hour, day: Math.floor((now - this.startedAt) / this.dayLengthMs) + 1, isNight: hour < 6 || hour >= 19, weather: this.weather };
   }
-  spawnAnimal(x, y, biome = "forest") { const animal = { id: `animal_${this.nextAnimal++}`, species: biome === "meadow" ? "rabbit" : biome === "lake" ? "duck" : "deer", x, y, biome }; this.animals.set(animal.id, animal); return animal; }
+  spawnAnimal(x, y, biome = "forest") { const animal = { id: `animal_${this.nextAnimal++}`, species: biome === "meadow" ? "rabbit" : biome === "lake" ? "duck" : "deer", x, y, biome, vx: 0, vy: 0 }; this.animals.set(animal.id, animal); return animal; }
+  update(dt) { for (const animal of this.animals.values()) { if (Math.random() < 0.025) { animal.vx = (Math.random() - 0.5) * 18; animal.vy = (Math.random() - 0.5) * 18; } animal.x = Math.max(20, Math.min(3180, animal.x + animal.vx * dt)); animal.y = Math.max(20, Math.min(2380, animal.y + animal.vy * dt)); } }
   nearbyAnimals(x, y, range = 500) { return [...this.animals.values()].filter(a => Math.hypot(a.x - x, a.y - y) <= range); }
 }
 class SocialSystems {
