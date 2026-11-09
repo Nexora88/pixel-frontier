@@ -2,7 +2,7 @@
 
 ## Current implementation boundary
 
-The current game server is a single authoritative world process. Socket.IO chunk rooms reduce unnecessary broadcasts, but they are **not** horizontal game-world sharding. A logical lobby allocator alone cannot make multiple Node.js processes safe: player movement, clan ownership, structures, chunk state and persistence must have one authoritative owner.
+The current game server is a single authoritative world process. Socket.IO chunk rooms reduce unnecessary broadcasts, but they are not horizontal game-world sharding. A logical lobby allocator alone cannot make multiple Node.js processes safe: player movement, clan ownership, structures, chunk state and persistence must have one authoritative owner.
 
 ## Target topology
 
@@ -21,6 +21,7 @@ The current game server is a single authoritative world process. Socket.IO chunk
 
 - Keep the server authoritative and publish only nearby chunk state.
 - Avoid allocating a full building list for every player every tick; query nearby chunks.
+- Index players by chunk so each client snapshot visits nearby players rather than scanning all connections.
 - Keep snapshot cadence separate from simulation tick cadence.
 - Bound entity counts, per-socket event rates, payload sizes and lobby occupancy.
 - Reuse cached territory/dominance snapshots and calculate dominance no more than once per second.
