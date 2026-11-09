@@ -3,18 +3,18 @@
 ## Aşama 0 — Görsel temel ve anlaşılır başlangıç (şimdi)
 - [x] Kadim sınırlar sanat yönü: parşömen, ahşap, taş ve bronz arayüz.
 - [x] Türkçe HUD ve temel oyun terimleri.
-- [x] İlk yerleşim görev zinciri: kaynak → balta → sandık → kabile.
+- [x] İlk yerleşim rehberi: kaynak → balta → çalışma tezgâhı → sandık.\n- [x] Kabileye katılmayı isteğe bağlı hale getirme; solo ilerleme seçeneği.\n- [x] Çalışma tezgâhı için sunucu taraflı yapı tanımı ve piksel tarzı çizim.\n- [x] Yakın ağaç taçlarında düşük maliyetli rüzgâr hareketi.
 - [x] Envanter filtreleri, eşya açıklaması ve seçili eşya görünümü.
 - [x] Biyomlarda deterministik zemin ayrıntıları ve eski taş kalıntıları.
 - [x] Ahşap/taş duvar, kapı, sandık ve totem için daha ayırt edilebilir çizimler.
 - [ ] Masaüstü ve gerçek telefon ekranında görsel QA; ölçek, taşma ve okunabilirlik.
 - [ ] Toplama, üretim, sandık transferi ve inşa akışını iki ayrı oyuncuyla doğrulama.
 
-## Aşama 1 — Oyunun amacı ve ilk 30 dakika (1–2. hafta)
-- [ ] Görev ilerlemesini sunucu tarafında kalıcı hale getirme; istemci yalnızca görüntülesin.
+## Aşama 1 — Kalıcı ilerleme ve ilk 30 dakika (1–2. hafta)
+- [ ] Görev ilerlemesini PostgreSQL üzerinde sunucu tarafında kalıcı hale getirme; istemci yalnızca görüntülesin.\n- [ ] Görev ödüllerini tekrar gönderime karşı idempotent hale getirme; farklı cihazdan devam testi.
 - [ ] Başlangıç rehberi: hareket, kaynak, envanter, üretim, inşa ve güvenli bölge.
 - [ ] Oyuncunun ilk 30 dakikada tamamlayabileceği 3 bölüm ve anlaşılır ödül döngüsü.
-- [ ] Yeni tarifler: kamp ateşi, basit çalışma tezgâhı, yatak/istirahat noktası, işaret levhası.
+- [ ] Çalışma tezgâhını tarif doğrulaması ve tarif kitabıyla tamamlamak.\n- [ ] Yeni tarifler: kamp ateşi, yatak/istirahat noktası, işaret levhası ve tarım araçları.
 - [ ] Kaynak yenilenmesi ve çanta doluluğu için anlaşılır geri bildirim.
 - [ ] Görev ve üretim maliyetleri için ekonomi dengelemesi.
 
@@ -30,16 +30,16 @@
 ## Aşama 3 — Yerleşim, meslek ve keşif (4–6. hafta)
 - [ ] Çalışma tezgâhı ve tarif ağacı.
 - [ ] Meslek uzmanlıkları; sınıf kilidi olmadan değiştirilebilir ilerleme.
-- [ ] Tarım, tohum, sulama, hasat ve yiyecek hazırlama.
+- [ ] Tarım, tohum, sulama, büyüme evreleri, hasat ve yiyecek hazırlama.\n- [ ] Mevsimlere göre ürün takvimi ve toprak dinlenmesi.
 - [ ] Harabe/mağara/antik yol keşif noktaları ve küçük çevresel hikâyeler.
 - [ ] Yerleşim kroniği, tabela ve oyuncu yapımı yollar.
 - [ ] Kaynak yenilenmesi ve bölgesel ekoloji.
 
 ## Aşama 4 — Kabileler ve ortak dünya (6–8. hafta)
-- [ ] Kabile rolleri, davet ve izinler.
+- [ ] Kabile kuruluşunda en az 3 farklı canlı insan oyuncu için kurucu onayı; kabilesiz ilerleme korunur.\n- [ ] Kabile rolleri, davet ve izinler.\n- [ ] Yurt sancakları, yerleşim kroniği ve topluluk aidiyeti; ayrımcı/üstünlükçü sistem yok.
 - [ ] Ortak depo, kabile görevleri ve katkı panosu.
 - [ ] 400×400 toprak sahipliği için görsel harita katmanı ve anlaşılır sınırlar.
-- [ ] Korunan başlangıç, çevrimdışı koruma ve adil rekabet kuralları.
+- [ ] Korunan başlangıç, çevrimdışı koruma ve adil rekabet kuralları.\n- [ ] Mevsimsel yapı yıpranması: yeni → kullanılmış → yıpranmış → hasarlı → harabe.\n- [ ] Bakım/onarım, uzun tolerans ve çevrimdışı oyuncu koruması.
 - [ ] Pazar/emanet ticaret ve çevrimdışı satış akışı.
 - [ ] Düzenli ortak dünya etkinlikleri.
 
@@ -51,7 +51,7 @@
 - [ ] Mobil/masaüstü tarayıcı regresyonu ve bağlantı kopma testleri.
 - [ ] Gözlemlenebilirlik, oran sınırlama, moderasyon ve yayın kontrol listesi.
 
-## Ölçüm ve çıkış kriterleri
+## İnsan oyuncu ilkesi\n- Oyuncu sayısı yalnızca canlı, doğrulanmış insan oturumlarını gösterir. Bot oyuncu, sahte çevrimiçi nüfus veya otomatik pazar katılımcısı eklenmez.\n- Çevresel vahşi yaşam oyuncu değildir ve çevrimiçi oyuncu sayısına dahil edilmez.\n- Yük testlerindeki sentetik istemciler test metriği olarak ayrı etiketlenir.\n\n## Ölçüm ve çıkış kriterleri
 - Mevcut 50 oyunculuk lobi tahsisi süreç içidir; çok sunuculu kapasite anlamına gelmez.
 - 2.000–5.000 eşzamanlı oyuncu hedefi ölçülmüş kapasite değildir.
 - Görsel efektler chunk dışına taşmamalı; gereksiz dünya geneli yayın yapılmamalı.
