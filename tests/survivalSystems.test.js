@@ -23,6 +23,23 @@ test("environment exposes deterministic clock shape and wildlife species", () =>
   assert.equal(typeof env.snapshot(12000).isNight, "boolean"); assert.equal(env.spawnAnimal(10, 20, "meadow").species, "rabbit");
 });
 test("clans and trade listings validate input", () => {
-  const social = new SocialSystems(), p = { id: "p1" }; assert.equal(social.createClan(p, "Pioneers").ok, true);
+  const social = new SocialSystems(), slots = emptySlots(); addToSlots(slots, "wood", 5); const p = { id: "p1", slots }; assert.equal(social.createClan(p, "Pioneers").ok, true);
   assert.equal(social.createTrade(p, "wood", 2, "stone", 1).ok, true); assert.equal(social.createTrade(p, "unknown", 1, "stone", 1).ok, false);
+});
+
+test("chest transfers preserve item counts and enforce access", () => {
+  const store = new ChestStore(), chestBuilding = { id: "chest-a", type: "chest", ownerId: "owner" }; store.register(chestBuilding);
+  const slots = emptySlots(); addToSlots(slots, "wood", 10); const player = { id: "owner", slots };
+  assert.equal(store.transfer("chest-a", player, "deposit", 0, 0, 6).ok, true);
+  assert.equal(slotCounts(player.slots).wood, 4); assert.equal(slotCounts(store.chests.get("chest-a").slots).wood, 6);
+  assert.equal(chestBuilding.storageSlots[0].quantity, 6);
+  assert.equal(store.transfer("chest-a", { id: "stranger", slots: emptySlots() }, "withdraw", 0, 0, 1).reason, "chest-access-denied");
+});
+test("trade settlement exchanges both sides atomically", () => {
+  const social = new SocialSystems(), sellerSlots = emptySlots(), buyerSlots = emptySlots();
+  addToSlots(sellerSlots, "wood", 5); addToSlots(buyerSlots, "stone", 2);
+  const seller = { id: "seller", slots: sellerSlots }, buyer = { id: "buyer", slots: buyerSlots };
+  const listing = social.createTrade(seller, "wood", 5, "stone", 2); assert.equal(listing.ok, true);
+  assert.equal(social.acceptTrade(buyer, listing.trade.id, seller).ok, true);
+  assert.equal(slotCounts(buyer.slots).wood, 5); assert.equal(slotCounts(seller.slots).stone, 2);
 });
