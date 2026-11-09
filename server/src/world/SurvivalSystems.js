@@ -1,4 +1,4 @@
-const { BIOMES, getBiomeAt } = require("./generateWorld");
+const { getBiomeAt } = require("./generateWorld");
 const { ITEMS } = require("./ItemCatalog");
 
 const EQUIPMENT = Object.freeze({
@@ -61,12 +61,21 @@ class ChestStore {
   constructor() { this.chests = new Map(); }
   register(building) { if (building.type === "chest" || building.type === "storage_chest") this.chests.set(building.id, { ownerId: building.ownerId, clanId: building.clanId || null, slots: emptySlots(BUILDINGS.chest.storageSlots) }); }
   canAccess(chest, player) { return !!chest && (chest.ownerId === player.id || (!!chest.clanId && chest.clanId === player.clanId)); }
-  transfer(chestId, player, from, to, amount) {
+  transfer(chestId, player, direction, playerSlot, chestSlot, amount) {
     const chest = this.chests.get(chestId); if (!this.canAccess(chest, player)) return { ok: false, reason: "chest-access-denied" };
-    const source = from === "player" ? player.slots : chest.slots, target = from === "player" ? chest.slots : player.slots;
-    const result = moveSlot(source, from === "player" ? to : from, from === "player" ? from : to, amount);
-    if (result.ok) return { ok: true, playerSlots: player.slots, chestSlots: chest.slots };
-    return result;
+    if (!Number.isInteger(playerSlot) || !Number.isInteger(chestSlot) || playerSlot < 0 || chestSlot < 0) return { ok: false, reason: "invalid-slot" };
+    const source = direction === "deposit" ? player.slots : chest.slots;
+    const target = direction === "deposit" ? chest.slots : player.slots;
+    const from = direction === "deposit" ? playerSlot : chestSlot, to = direction === "deposit" ? chestSlot : playerSlot;
+    if (!["deposit", "withdraw"].includes(direction) || !source?.[from]) return { ok: false, reason: "empty-slot" };
+    const sourceCopy = source.map(s => s && ({ ...s })), targetCopy = target.map(s => s && ({ ...s }));
+    const count = amount == null ? sourceCopy[from].quantity : amount;
+    if (!Number.isInteger(count) || count < 1 || count > sourceCopy[from].quantity) return { ok: false, reason: "invalid-amount" };
+    const item = sourceCopy[from].item, add = addToSlots(targetCopy, item, count);
+    if (!add.ok) return add;
+    sourceCopy[from].quantity -= count; if (!sourceCopy[from].quantity) sourceCopy[from] = null;
+    source.splice(0, source.length, ...sourceCopy); target.splice(0, target.length, ...targetCopy);
+    return { ok: true, playerSlots: player.slots, chestSlots: chest.slots };
   }
 }
 function canOccupy(seed, x, y, worldWidth, worldHeight, buildings = []) {
@@ -94,10 +103,14 @@ class SocialSystems {
     if (!ITEMS[item] || !ITEMS[priceItem] || !Number.isInteger(quantity) || !Number.isInteger(priceQuantity) || quantity < 1 || priceQuantity < 1) return { ok: false, reason: "invalid-trade" };
     const id = `trade_${this.nextTrade++}`; this.trades.set(id, { id, sellerId: player.id, item, quantity, priceItem, priceQuantity, status: "open" }); return { ok: true, trade: this.trades.get(id) };
   }
-  acceptTrade(player, tradeId, slots) {
-    const trade = this.trades.get(tradeId); if (!trade || trade.status !== "open" || trade.sellerId === player.id) return { ok: false, reason: "trade-unavailable" };
-    const counts = slotCounts(slots); if ((counts[trade.priceItem] || 0) < trade.priceQuantity) return { ok: false, reason: "not-enough-resources" };
-    trade.status = "accepted"; trade.buyerId = player.id; return { ok: true, trade };
+  acceptTrade(buyer, tradeId, seller) {
+    const trade = this.trades.get(tradeId); if (!trade || trade.status !== "open" || trade.sellerId === buyer.id || !seller || seller.id !== trade.sellerId) return { ok: false, reason: "trade-unavailable" };
+    const buyerSlots = buyer.slots.map(s => s && ({ ...s })), sellerSlots = seller.slots.map(s => s && ({ ...s }));
+    if (!consumeFromSlots(buyerSlots, { [trade.priceItem]: trade.priceQuantity }).ok || !consumeFromSlots(sellerSlots, { [trade.item]: trade.quantity }).ok) return { ok: false, reason: "not-enough-resources" };
+    if (!addToSlots(buyerSlots, trade.item, trade.quantity).ok || !addToSlots(sellerSlots, trade.priceItem, trade.priceQuantity).ok) return { ok: false, reason: "inventory-full" };
+    buyer.slots.splice(0, buyer.slots.length, ...buyerSlots); seller.slots.splice(0, seller.slots.length, ...sellerSlots);
+    buyer.inventory = slotCounts(buyer.slots); seller.inventory = slotCounts(seller.slots);
+    trade.status = "accepted"; trade.buyerId = buyer.id; return { ok: true, trade };
   }
 }
 module.exports = { EQUIPMENT, BUILDINGS, emptySlots, addToSlots, moveSlot, slotCounts, consumeFromSlots, ChestStore, canOccupy, EnvironmentSimulation, SocialSystems };
