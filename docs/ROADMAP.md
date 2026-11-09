@@ -1,34 +1,58 @@
-# 90-Day Roadmap
+# Pixel Frontier — 90 Günlük Geliştirme Yol Haritası
 
-Implemented in the current development branch:
-- [x] Node/Express/Socket.io server and server-authoritative movement
-- [x] Directional pixel survivor animations
-- [x] Seeded forest, lake, mountain and meadow biomes with biome resources
-- [x] 3×3 chunk interest management and scoped deltas
-- [x] 24-slot server-authoritative inventory and stack-aware movement
-- [x] Primitive starter tool and wooden axe/pickaxe crafting
-- [x] Wood/stone walls, owner/clan doors and private chest storage
-- [x] PostgreSQL migrations for players, chunks, structures, clans, trades and world clock
-- [x] Signed anonymous session token and reconnect restoration
-- [x] Biome movement modifiers, blocked terrain and structure collision
-- [x] Server-driven day/night, weather state and basic wildlife wandering
-- [x] Clan membership and validated barter settlement
-- [x] Process-local 50-player lobby allocation and Socket.IO room assignment
-- [x] Chunk-indexed online player visibility and building collision index
-- [x] Clan totem territory rendering, safe-perimeter placement and dominance snapshots
+## Aşama 0 — Görsel temel ve anlaşılır başlangıç (şimdi)
+- [x] Kadim sınırlar sanat yönü: parşömen, ahşap, taş ve bronz arayüz.
+- [x] Türkçe HUD ve temel oyun terimleri.
+- [x] İlk yerleşim görev zinciri: kaynak → balta → sandık → kabile.
+- [x] Envanter filtreleri, eşya açıklaması ve seçili eşya görünümü.
+- [x] Biyomlarda deterministik zemin ayrıntıları ve eski taş kalıntıları.
+- [x] Ahşap/taş duvar, kapı, sandık ve totem için daha ayırt edilebilir çizimler.
+- [ ] Masaüstü ve gerçek telefon ekranında görsel QA; ölçek, taşma ve okunabilirlik.
+- [ ] Toplama, üretim, sandık transferi ve inşa akışını iki ayrı oyuncuyla doğrulama.
 
-## Remaining milestones
-- [ ] Live PostgreSQL deployment verification with production credentials and backup/restore drill
-- [ ] Browser visual QA and two-device multiplayer playtest
-- [ ] Resource regeneration, animal behavior/interaction and richer weather visuals
-- [ ] Building placement preview, rotation, damage/repair and more detailed door controls
-- [ ] Account recovery, moderation, invite-based clan permissions and offline trade escrow
-- [ ] Hunger, rest, health and non-combat survival pressure
-- [ ] Protected starter regions, anti-camping and fair competitive rules
-- [ ] Redis-backed gateway fan-out and authoritative world-shard ownership (required before multi-node scaling)
-- [ ] Automatic lobby placement across multiple world shards and autoscaling
-- [ ] Cloudflare WAF/origin lockdown, abuse/rate-limit tests, observability and production runbook
-- [ ] 2k–5k concurrent-player load tests and repeatable CPU/heap profiling
+## Aşama 1 — Oyunun amacı ve ilk 30 dakika (1–2. hafta)
+- [ ] Görev ilerlemesini sunucu tarafında kalıcı hale getirme; istemci yalnızca görüntülesin.
+- [ ] Başlangıç rehberi: hareket, kaynak, envanter, üretim, inşa ve güvenli bölge.
+- [ ] Oyuncunun ilk 30 dakikada tamamlayabileceği 3 bölüm ve anlaşılır ödül döngüsü.
+- [ ] Yeni tarifler: kamp ateşi, basit çalışma tezgâhı, yatak/istirahat noktası, işaret levhası.
+- [ ] Kaynak yenilenmesi ve çanta doluluğu için anlaşılır geri bildirim.
+- [ ] Görev ve üretim maliyetleri için ekonomi dengelemesi.
 
-## Performance exit criteria
-Nearby chunk subscriptions remain bounded; no full-world broadcast is introduced. Capacity claims require repeatable load tests and profiling.
+## Aşama 2 — Kadim dünya ve sanat paketi (2–4. hafta)
+- [ ] Özgün 32×32 karakter seti: en az 4 yön, idle/yürüme/toplama/inşa klipleri.
+- [ ] 64×64 ağaçlar, çalılar, taşlar ve biyom bitki örtüsü.
+- [ ] Orman, çayır, göl, dağ ve harabe için tutarlı tile set.
+- [ ] Ahşap/taş yapı modülleri, kapı açılma ve sandık animasyonu.
+- [ ] Gün doğumu/batımı, sis, yağmur, su ve ateş efektleri.
+- [ ] Ses paketi: adım, toplama, taş/odun, zanaat, kapı, sandık ve ortam sesleri.
+- [ ] Düşük donanım profili; efekt yoğunluğu ve nesne havuzları.
+
+## Aşama 3 — Yerleşim, meslek ve keşif (4–6. hafta)
+- [ ] Çalışma tezgâhı ve tarif ağacı.
+- [ ] Meslek uzmanlıkları; sınıf kilidi olmadan değiştirilebilir ilerleme.
+- [ ] Tarım, tohum, sulama, hasat ve yiyecek hazırlama.
+- [ ] Harabe/mağara/antik yol keşif noktaları ve küçük çevresel hikâyeler.
+- [ ] Yerleşim kroniği, tabela ve oyuncu yapımı yollar.
+- [ ] Kaynak yenilenmesi ve bölgesel ekoloji.
+
+## Aşama 4 — Kabileler ve ortak dünya (6–8. hafta)
+- [ ] Kabile rolleri, davet ve izinler.
+- [ ] Ortak depo, kabile görevleri ve katkı panosu.
+- [ ] 400×400 toprak sahipliği için görsel harita katmanı ve anlaşılır sınırlar.
+- [ ] Korunan başlangıç, çevrimdışı koruma ve adil rekabet kuralları.
+- [ ] Pazar/emanet ticaret ve çevrimdışı satış akışı.
+- [ ] Düzenli ortak dünya etkinlikleri.
+
+## Aşama 5 — Ölçek ve yayın hazırlığı (8–12. hafta)
+- [ ] PostgreSQL kalıcılık, yedekleme ve geri yükleme tatbikatı.
+- [ ] Redis koordinasyonu ve gerçek çoklu süreç dünya sahipliği.
+- [ ] 50–60 oyunculu dünya testi; ardından çoklu dünya testleri.
+- [ ] 1/10/30/60 oyuncu senaryoları, CPU/RAM/ağ/gecikme ölçümleri.
+- [ ] Mobil/masaüstü tarayıcı regresyonu ve bağlantı kopma testleri.
+- [ ] Gözlemlenebilirlik, oran sınırlama, moderasyon ve yayın kontrol listesi.
+
+## Ölçüm ve çıkış kriterleri
+- Mevcut 50 oyunculuk lobi tahsisi süreç içidir; çok sunuculu kapasite anlamına gelmez.
+- 2.000–5.000 eşzamanlı oyuncu hedefi ölçülmüş kapasite değildir.
+- Görsel efektler chunk dışına taşmamalı; gereksiz dünya geneli yayın yapılmamalı.
+- Her aşama test ve gerçek cihaz kontrolü tamamlanmadan bitmiş sayılmaz.
