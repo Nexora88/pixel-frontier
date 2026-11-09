@@ -14,38 +14,30 @@ class TerritorySystem {
     this.dirty = true;
   }
 
+  invalidate() {
+    this.dirty = true;
+    this.lastDominanceAt = 0;
+  }
+
   isSafeZone(x, y) {
     return x < 200 || y < 200 || x > WORLD.width - 200 || y > WORLD.height - 200;
   }
 
   snapshot() {
+    if (!this.dirty) return this.cachedTerritories;
     const territories = [];
     for (const building of this.world.buildings.values()) {
       if (building.type !== "clan_totem" || !building.clanId) continue;
       const clan = this.social.clans.get(building.clanId);
       if (!clan) continue;
       territories.push({
-        id: building.id,
-        clanId: clan.id,
-        clanName: clan.name,
-        x: building.x,
-        y: building.y,
-        width: TERRITORY_SIZE,
-        height: TERRITORY_SIZE,
-        color: this.colorFor(clan.id)
+        id: building.id, clanId: clan.id, clanName: clan.name,
+        x: building.x, y: building.y, width: TERRITORY_SIZE, height: TERRITORY_SIZE
       });
     }
-    return territories;
-  }
-
-  colorFor(id) {
-    let hash = 2166136261;
-    for (const char of String(id)) {
-      hash ^= char.charCodeAt(0);
-      hash = Math.imul(hash, 16777619);
-    }
-    const hue = hash % 360;
-    return `hsl(${hue} 78% 62%)`;
+    this.cachedTerritories = territories;
+    this.dirty = false;
+    return this.cachedTerritories;
   }
 
   territoryAt(x, y, territories = this.snapshot()) {
@@ -60,14 +52,10 @@ class TerritorySystem {
     const current = this.territoryAt(player.x, player.y, territories);
     const previous = this.playerTerritories.get(player.id) || null;
     const nextId = current?.clanId || null;
-    if (nextId !== previous) {
-      this.playerTerritories.set(player.id, nextId);
-      if (current && current.clanId !== player.clanId) {
-        socket.emit("territory:entered", {
-          clanName: current.clanName,
-          clanId: current.clanId
-        });
-      }
+    if (nextId === previous) return;
+    this.playerTerritories.set(player.id, nextId);
+    if (current && current.clanId !== player.clanId) {
+      socket.emit("territory:entered", { clanName: current.clanName, clanId: current.clanId });
     }
   }
 
