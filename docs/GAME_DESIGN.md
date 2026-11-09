@@ -8,15 +8,15 @@ Oyuncu bilinmeyen bir diyara tek başına gelen bir yolcu olarak başlar. Uzun v
 1. Doğayı tanımak ve hayatta kalmak.
 2. Aletlerini ve zanaat bilgisini geliştirmek.
 3. İlk sığınağını ve erzak düzenini kurmak.
-4. Başka oyuncularla kabile oluşturmak.
+4. İster tek başına ilerlemek ister mevcut bir topluluğa katılmak; kabile kurmak zorunlu değildir.
 5. Totemlerle yurdunu işaretlemek, yollar ve ticaret noktaları kurmak.
 6. Haritadaki eski kalıntıları keşfedip dünyanın geçmişini ortaya çıkarmak.
 7. Kendi yerleşimini büyütürken diğer oyuncularla iş birliği yapmak, ticaret etmek ve ortak dünya olaylarına katılmak.
 
 ## İlk oynanabilir döngü
-Keşfet → kaynakları topla → çantayı yönet → alet üret → sığınak kur → kabileye katıl/kur → yeni bölgelere açıl → ticaret ve keşif yap.
+Keşfet → kaynakları topla → çantayı yönet → zanaat yap → tarım ve yerleşim kur → solo ilerle veya topluluğa katıl → ticaret ve keşif yap.
 
-İlk görev zinciri: 15 odun ve 5 taş topla → tahta balta üret → erzak sandığı yerleştir → kabile kur. Bu görev oyuncuya mevcut sistemleri öğretir; ödül ekonomisi veya sunucu taraflı görev sistemi eklenene kadar istemci tarafında rehber niteliğindedir.
+İlk görev zinciri: 15 odun ve 5 taş topla → tahta balta üret → çalışma tezgâhı kur → erzak sandığı yerleştir. Kabileye katılmak isteğe bağlıdır. Mevcut görev rehberi istemci tarafındadır; kalıcı sunucu görev sistemi henüz geliştirilmelidir.
 
 ## Görsel sanat yönü
 - Dünya: 16-bit/32-bit hissinde, okunaklı üstten görünüm; kare pikseller ve sınırlı palet.
@@ -34,7 +34,7 @@ Keşfet → kaynakları topla → çantayı yönet → alet üret → sığınak
 - Tarifler oyuncuya maliyeti önceden göstermeli; malzeme yoksa açık ve tutarlı geri bildirim verilmeli.
 - İstemci yalnızca arayüzdür; eşya, tarif, sahiplik ve sonuçların tek doğruluk kaynağı sunucudur.
 
-## Uzun vadeli sistemler
+## Yaşayan toplum ve zaman\n- Çiftçilik, zanaat, keşif, ticaret, inşaat ve toplama birbirinden bağımsız ilerleme yolları olmalıdır.\n- Kabile kurmak zorunlu değildir; kuruluş eşiği, kurucu onayı ve topluluk rolleri gerektirir.\n- Oyuncu sayısı yalnızca gerçek çevrimiçi insan oturumlarını sayar; bot oyuncu veya sahte nüfus yoktur.\n- Mevsimler tarım, görsel çevre ve yapı bakımı üzerinde etkili olur. Surlar zamanla yıpranır; bakım, onarım ve harabeye dönüşme döngüsü bulunur.\n- Yurt aidiyeti sancak, yerleşim adı, kronik ve ortak emekle kurulur; diğer topluluklara saygı esastır.\n\n## Uzun vadeli sistemler
 - Meslekler: oduncu, taş ustası, izci, çiftçi, zanaatkâr ve tüccar. Kalıcı sınıf kilidi yerine değiştirilebilir uzmanlık.
 - Yerleşim: ortak depo, üretim tezgâhları, tarlalar, yollar, işaret levhaları ve yerleşim kroniği.
 - Keşif: harabe, mağara, eski yol, nadir kaynak ve bölgesel hikâyeler.
@@ -50,5 +50,5 @@ Keşfet → kaynakları topla → çantayı yönet → alet üret → sığınak
 5. **Adil çok oyunculu:** Çevrimdışı koruma, izinler, toparlanma ve savaş dışı ilerleme temel özelliklerdir.
 6. **Performans:** Efektler, sahne nesneleri, ağ paketleri ve sunucu işi sınırlı tutulur; kapasite ancak yük testleriyle ilan edilir.
 
-## Savaş yaklaşımı
+Ayrıntılı sistem kuralları ve kabul kriterleri için [Yaşayan Dünya Tasarımı](LIVING_WORLD_DESIGN.md) belgesine bak.\n\n## Savaş yaklaşımı
 Savaş ana amaç değildir; keşif, üretim, yerleşim ve ticaret kadar önemli bir seçenek olabilir. Rekabet sistemleri ancak güvenli başlangıç, açık rıza, koruma pencereleri ve çevrimdışı adalet tasarlandıktan sonra açılmalıdır.
