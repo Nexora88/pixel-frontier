@@ -19,16 +19,18 @@ function emptySlots(size = STARTER_SLOTS) { return Array.from({ length: size }, 
 function addToSlots(slots, item, amount = 1) {
   if (!ITEMS[item] && !EQUIPMENT[item]) return { ok: false, reason: "unknown-item" };
   if (!Number.isInteger(amount) || amount < 1) return { ok: false, reason: "invalid-amount" };
+  const next = slots.map(slot => slot && ({ ...slot }));
   const max = ITEMS[item]?.stack || 1;
   let remaining = amount;
-  for (const slot of slots) if (slot?.item === item && slot.quantity < max) {
+  for (const slot of next) if (slot?.item === item && slot.quantity < max) {
     const moved = Math.min(max - slot.quantity, remaining); slot.quantity += moved; remaining -= moved;
-    if (!remaining) return { ok: true, remaining: 0 };
+    if (!remaining) { slots.splice(0, slots.length, ...next); return { ok: true, remaining: 0 }; }
   }
-  for (let i = 0; i < slots.length && remaining; i++) if (!slots[i]) {
-    const moved = Math.min(max, remaining); slots[i] = { item, quantity: moved }; remaining -= moved;
+  for (let i = 0; i < next.length && remaining; i++) if (!next[i]) {
+    const moved = Math.min(max, remaining); next[i] = { item, quantity: moved }; remaining -= moved;
   }
-  return remaining ? { ok: false, reason: "inventory-full", remaining } : { ok: true, remaining: 0 };
+  if (remaining) return { ok: false, reason: "inventory-full", remaining };
+  slots.splice(0, slots.length, ...next); return { ok: true, remaining: 0 };
 }
 function moveSlot(slots, from, to, amount) {
   if (![from, to].every(Number.isInteger) || from < 0 || to < 0 || from >= slots.length || to >= slots.length || from === to) return { ok: false, reason: "invalid-slot" };
