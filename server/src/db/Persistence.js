@@ -13,16 +13,22 @@ class Persistence {
     `);
     return true;
   }
+  async loadWorld() {
+    if (!this.pool) return { chunks: [], structures: [] };
+    const [chunks,structures]=await Promise.all([this.pool.query("SELECT chunk_key,seed,biome,state FROM world_chunks"),this.pool.query("SELECT state FROM structures")]);
+    return { chunks: chunks.rows.map(r=>r.state), structures: structures.rows.map(r=>r.state) };
+  }
   async savePlayer(p) {
     if (!this.pool) return;
     await this.pool.query("INSERT INTO players(id,name,x,y,inventory,slots,clan_id) VALUES($1,$2,$3,$4,$5,$6,$7) ON CONFLICT(id) DO UPDATE SET name=EXCLUDED.name,x=EXCLUDED.x,y=EXCLUDED.y,inventory=EXCLUDED.inventory,slots=EXCLUDED.slots,clan_id=EXCLUDED.clan_id,updated_at=NOW()", [p.id,p.name,p.x,p.y,JSON.stringify(p.inventory),JSON.stringify(p.slots || []),p.clanId || null]);
   }
-  async loadPlayer(id) { if (!this.pool) return null; const r = await this.pool.query("SELECT * FROM players WHERE id=$1", [id]); return r.rows[0] || null; }
   async saveChunk(chunk, seed) {
     if (!this.pool) return;
     await this.pool.query("INSERT INTO world_chunks(chunk_key,seed,biome,state) VALUES($1,$2,$3,$4) ON CONFLICT(chunk_key) DO UPDATE SET state=EXCLUDED.state,updated_at=NOW()", [chunk.key,seed,chunk.biome,JSON.stringify(chunk)]);
   }
   async saveStructure(b) { if (!this.pool) return; await this.pool.query("INSERT INTO structures(id,chunk_key,owner_id,type,state) VALUES($1,$2,$3,$4,$5) ON CONFLICT(id) DO UPDATE SET state=EXCLUDED.state,updated_at=NOW()", [b.id,b.chunkKey,b.ownerId,b.type,JSON.stringify(b)]); }
+  async saveClan(c) { if (!this.pool) return; await this.pool.query("INSERT INTO clans(id,name,leader_id,members) VALUES($1,$2,$3,$4) ON CONFLICT(id) DO UPDATE SET name=EXCLUDED.name,members=EXCLUDED.members", [c.id,c.name,c.leaderId,JSON.stringify(c.members)]); }
+  async saveTrade(t) { if (!this.pool) return; await this.pool.query("INSERT INTO trades(id,seller_id,state) VALUES($1,$2,$3) ON CONFLICT(id) DO UPDATE SET state=EXCLUDED.state,updated_at=NOW()", [t.id,t.sellerId,JSON.stringify(t)]); }
   async close() { if (this.pool) await this.pool.end(); }
 }
 module.exports = { Persistence };
