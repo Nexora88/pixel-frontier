@@ -109,16 +109,17 @@ class WorldState {
     if (!Number.isFinite(x) || !Number.isFinite(y) || x < 24 || y < 24 || x > WORLD.width - 24 || y > WORLD.height - 24) return { ok: false, reason: "invalid-position" };
     if (Math.hypot(player.x - x, player.y - y) > GAME.interactionRange * 1.5) return { ok: false, reason: "too-far" };
     if (canonical === "clan_totem" && !player.clanId) return { ok: false, reason: "clan-required" };
-    if (canonical === "clan_totem" && (x < 200 || y < 200 || x > WORLD.width - 200 || y > WORLD.height - 200)) return { ok: false, reason: "safe-zone" };
-    const nearby = this.nearbyBuildings(x, y, 48);
+    const buildX = Math.round(x / 24) * 24, buildY = Math.round(y / 24) * 24;
+    if (canonical === "clan_totem" && (buildX < 200 || buildY < 200 || buildX > WORLD.width - 200 || buildY > WORLD.height - 200)) return { ok: false, reason: "safe-zone" };
+    const nearby = this.nearbyBuildings(buildX, buildY, 48);
     if (!canOccupy(this.seed, x, y, WORLD.width, WORLD.height, nearby)) return { ok: false, reason: "blocked-position" };
     const costs = definition?.costs || (canonical === "campfire" ? { wood: 4, stone: 2 } : null);
     const used = consumeFromSlots(player.slots, costs);
     if (!used.ok) return used;
-    const chunkKey = `${Math.floor(x / WORLD.chunkSize)},${Math.floor(y / WORLD.chunkSize)}`;
+    const chunkKey = `${Math.floor(buildX / WORLD.chunkSize)},${Math.floor(buildY / WORLD.chunkSize)}`;
     const building = {
       id: `building_${this.nextBuildingId++}`, ownerId: player.id, clanId: player.clanId || null,
-      type: canonical, x: Math.round(x / 24) * 24, y: Math.round(y / 24) * 24,
+      type: canonical, x: buildX, y: buildY,
       chunkKey, hp: definition?.hp || 100, solid: definition?.solid ?? false, createdAt: Date.now()
     };
     this.indexBuilding(building);
