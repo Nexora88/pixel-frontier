@@ -72,10 +72,13 @@ class ChestStore {
     if (!["deposit", "withdraw"].includes(direction) || !source?.[from]) return { ok: false, reason: "empty-slot" };
     const sourceCopy = source.map(s => s && ({ ...s })), targetCopy = target.map(s => s && ({ ...s }));
     const count = amount == null ? sourceCopy[from].quantity : amount;
-    if (!Number.isInteger(count) || count < 1 || count > sourceCopy[from].quantity) return { ok: false, reason: "invalid-amount" };
-    const item = sourceCopy[from].item, add = addToSlots(targetCopy, item, count);
-    if (!add.ok) return add;
-    sourceCopy[from].quantity -= count; if (!sourceCopy[from].quantity) sourceCopy[from] = null;
+    if (!Number.isInteger(count) || count < 1 || count > sourceCopy[from].quantity || to >= targetCopy.length) return { ok: false, reason: "invalid-amount" };
+    const item = sourceCopy[from].item, destination = targetCopy[to], max = ITEMS[item]?.stack || 1;
+    if (!destination) targetCopy[to] = { item, quantity: count };
+    else if (destination.item === item && destination.quantity + count <= max) destination.quantity += count;
+    else if (count === sourceCopy[from].quantity) { targetCopy[to] = sourceCopy[from]; sourceCopy[from] = destination; }
+    else return { ok: false, reason: "slot-unavailable" };
+    if (sourceCopy[from]) { sourceCopy[from].quantity -= count; if (sourceCopy[from].quantity <= 0) sourceCopy[from] = null; }
     source.splice(0, source.length, ...sourceCopy); target.splice(0, target.length, ...targetCopy);
     return { ok: true, playerSlots: player.slots, chestSlots: chest.slots };
   }
