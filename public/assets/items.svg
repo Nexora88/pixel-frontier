@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="16" viewBox="0 0 256 16" shape-rendering="crispEdges">
+<rect width="256" height="16" fill="none"/>
+<!-- 0 tree -->
+<g><rect x="6" y="8" width="4" height="7" fill="#80502f"/><rect x="4" y="3" width="8" height="7" fill="#27613a"/><rect x="2" y="5" width="5" height="5" fill="#3d874b"/><rect x="9" y="2" width="5" height="6" fill="#4b9854"/><rect x="5" y="1" width="5" height="4" fill="#64a95b"/><rect x="7" y="10" width="2" height="3" fill="#a66d3c"/></g>
+<!-- 1 stone -->
+<g><rect x="19" y="7" width="9" height="6" fill="#777f83"/><rect x="21" y="4" width="6" height="4" fill="#929b9d"/><rect x="18" y="9" width="2" height="3" fill="#626a70"/><rect x="25" y="5" width="3" height="3" fill="#aeb6b5"/><rect x="21" y="11" width="5" height="2" fill="#5c646a"/></g>
+<!-- 2 berry bush -->
+<g><rect x="35" y="9" width="9" height="4" fill="#356d3f"/><rect x="37" y="5" width="6" height="5" fill="#4d914a"/><rect x="36" y="6" width="3" height="3" fill="#70aa53"/><rect x="39" y="4" width="3" height="3" fill="#a72f62"/><rect x="43" y="7" width="3" height="3" fill="#c44a78"/><rect x="35" y="8" width="3" height="3" fill="#b43c6b"/></g>
+<!-- 3 herb -->
+<g><rect x="54" y="9" width="2" height="5" fill="#47763b"/><rect x="50" y="5" width="5" height="4" fill="#5b9d4b"/><rect x="55" y="3" width="5" height="5" fill="#76b95a"/><rect x="52" y="2" width="3" height="4" fill="#8bc96c"/><rect x="57" y="7" width="4" height="3" fill="#3e8246"/></g>
+<!-- 4 reeds -->
+<g><rect x="67" y="5" width="2" height="10" fill="#568e55"/><rect x="71" y="2" width="2" height="13" fill="#7cad58"/><rect x="76" y="4" width="2" height="11" fill="#5b9954"/><rect x="66" y="2" width="3" height="3" fill="#b68b4d"/><rect x="71" y="0" width="3" height="3" fill="#b68b4d"/><rect x="76" y="1" width="3" height="3" fill="#b68b4d"/></g>
+<!-- 5 ore -->
+<g><rect x="83" y="7" width="10" height="7" fill="#6d6258"/><rect x="85" y="4" width="7" height="4" fill="#8c7b69"/><rect x="86" y="5" width="3" height="2" fill="#c0a078"/><rect x="90" y="8" width="3" height="3" fill="#c3a16e"/><rect x="84" y="10" width="3" height="2" fill="#4e4b49"/></g>
+<!-- 6 crystal -->
+<g><rect x="101" y="4" width="4" height="10" fill="#6c62b4"/><rect x="104" y="1" width="4" height="13" fill="#9a8ee0"/><rect x="108" y="5" width="3" height="9" fill="#766bc4"/><rect x="104" y="2" width="2" height="5" fill="#d1c8ff"/><rect x="102" y="7" width="2" height="4" fill="#aaa0ef"/></g>
+<!-- 7 fiber -->
+<g><rect x="115" y="4" width="2" height="9" fill="#c6a85d"/><rect x="118" y="2" width="2" height="11" fill="#e2c67a"/><rect x="121" y="5" width="2" height="8" fill="#b38d4e"/><rect x="114" y="12" width="11" height="2" fill="#8d713f"/></g>
+<!-- 8 wood stack -->
+<g><rect x="130" y="5" width="11" height="7" fill="#8a542e"/><rect x="130" y="5" width="11" height="2" fill="#b97942"/><rect x="131" y="9" width="10" height="2" fill="#633b25"/><rect x="139" y="6" width="2" height="5" fill="#d39a5c"/></g>
+<!-- 9 stone item -->
+<g><rect x="148" y="5" width="9" height="8" fill="#8b9498"/><rect x="150" y="3" width="5" height="3" fill="#b5bdbe"/><rect x="147" y="8" width="3" height="4" fill="#5e676c"/><rect x="153" y="8" width="4" height="3" fill="#727b80"/></g>
+<!-- 10 berries item -->
+<g><rect x="164" y="8" width="2" height="5" fill="#487b45"/><rect x="167" y="5" width="4" height="4" fill="#a72d61"/><rect x="171" y="8" width="4" height="4" fill="#c94d7b"/><rect x="164" y="10" width="4" height="3" fill="#8f2456"/><rect x="168" y="4" width="2" height="2" fill="#6ca34f"/></g>
+<!-- 11 iron ingot -->
+<g><rect x="180" y="6" width="11" height="7" fill="#657782"/><rect x="182" y="4" width="7" height="3" fill="#aab8bd"/><rect x="181" y="8" width="8" height="2" fill="#82949c"/><rect x="186" y="11" width="4" height="2" fill="#4c5c64"/></g>
+<!-- 12 primitive stone tool -->
+<g><rect x="198" y="8" width="2" height="7" fill="#80502f"/><rect x="196" y="3" width="7" height="6" fill="#7d898d"/><rect x="195" y="5" width="3" height="3" fill="#b0b9b9"/><rect x="200" y="4" width="4" height="4" fill="#59656b"/></g>
+<!-- 13 wooden axe -->
+<g><rect x="214" y="5" width="2" height="10" fill="#986033"/><rect x="211" y="3" width="7" height="3" fill="#b7c0c1"/><rect x="211" y="2" width="3" height="5" fill="#d0d5d2"/><rect x="214" y="7" width="3" height="2" fill="#74472b"/></g>
+<!-- 14 wooden pickaxe -->
+<g><rect x="230" y="6" width="2" height="9" fill="#986033"/><rect x="226" y="3" width="10" height="2" fill="#aeb9bb"/><rect x="227" y="2" width="2" height="4" fill="#737f83"/><rect x="234" y="2" width="2" height="4" fill="#737f83"/></g>
+<!-- 15 campfire -->
+<g><rect x="243" y="11" width="10" height="3" fill="#80502f"/><rect x="245" y="8" width="7" height="4" fill="#e27a31"/><rect x="247" y="4" width="4" height="6" fill="#ffd05b"/><rect x="248" y="1" width="2" height="5" fill="#fff0a3"/></g>
+</svg>
