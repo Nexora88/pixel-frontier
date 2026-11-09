@@ -3,12 +3,15 @@
 ## North star
 A persistent shared wilderness where player-made settlements, trade routes and local stories become the world's history. Pixel art is the visual language; systemic depth is the differentiator.
 
-## Pillars
-1. A world with memory: depletion, settlements and discoveries persist.
-2. Meaningful cooperation: specialization and trade make other survivors valuable.
-3. Readable risk: dangerous frontiers offer better opportunities while protected regions help new players learn.
-4. Player-authored geography: roads, shelters, camps and landmarks change navigation.
-5. Fair persistence: offline protection, recovery and ownership rules prevent destructive griefing.
+## Non-negotiable architecture and fairness principles
+These principles apply to every feature and every future refactor:
+
+1. **Authoritative server:** The client sends intent, never trusted outcomes. The server validates movement, gathering, crafting, building, combat and ownership. Client-side position, damage, inventory or resource claims are never accepted as truth.
+2. **Chunk-based interest management:** The server tracks each player's current chunk and subscribes them only to nearby chunks. Resource changes, structures and player snapshots are scoped to relevant subscribers; global broadcasts are reserved for truly global events.
+3. **Protected onboarding:** New survivors spawn in protected outer regions with clear routes into the frontier. Spawn protection, safe-zone boundaries and anti-camping rules are server-enforced. The central frontier can carry greater risk and reward.
+4. **Persistent world memory:** Player settlements, discovered landmarks, resource changes and world history survive restarts through durable storage and recoverable backups.
+5. **Fair multiplayer:** Progression must create meaningful specialization without allowing permanent domination. Offline protection, ownership permissions, recovery paths and non-combat play remain first-class systems.
+6. **Performance is a feature:** Bound per-tick work, validate and rate-limit inputs, avoid unbounded broadcasts, and measure server load before increasing player caps.
 
 ## First playable loop
 Explore → find a resource → gather → manage inventory → place a useful structure → meet another survivor → cooperate or trade.
