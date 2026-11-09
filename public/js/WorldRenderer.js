@@ -59,10 +59,10 @@ export class WorldRenderer {
     const shadow=this.scene.add.ellipse(r.x+2,r.y+7,24,8,0x17130e,.38).setDepth(r.y-2);
     const shape=this.scene.add.sprite(r.x,r.y,"items",frames[r.type]??1).setOrigin(.5,.75).setScale(2).setDepth(r.y+8);
     const canopy=r.type==="tree"?this.scene.add.ellipse(r.x,r.y-5,29,15,0x527b3b,.7).setStrokeStyle(1,0x9aaa62,.28).setDepth(r.y+9):null;
-    this.resourceObjects.set(r.id,{shape,shadow,canopy,chunkKey:r.chunkKey,type:r.type,x:r.x,y:r.y});
+    this.resourceObjects.set(r.id,{shape,shadow,canopy,chunkKey:r.chunkKey,type:r.type,x:r.x,y:r.y,phase:this.hash(r.id)%628/100});
   }
   removeResource(id){const o=this.resourceObjects.get(id);if(!o)return;o.shape.destroy();o.shadow.destroy();o.canopy?.destroy();this.resourceObjects.delete(id)}
-  updateCanopies(x,y){for(const o of this.resourceObjects.values())if(o.canopy){const under=Math.abs(x-o.x)<18&&y>o.y-20&&y<o.y+18;o.canopy.setAlpha(under?.2:.7)}}
+  updateCanopies(x,y,time=0){for(const o of this.resourceObjects.values())if(o.canopy){const under=Math.abs(x-o.x)<18&&y>o.y-20&&y<o.y+18;o.canopy.setAlpha(under?.2:.7);const nearby=Math.hypot(x-o.x,y-o.y)<260;if(nearby)o.canopy.setAngle(Math.sin(time/950+(o.phase||0))*1.7)}}
   setTerritories(items=[]){
     const g=this.territoryGraphics;g.clear();
     for(const t of items){const color=this.colorFor(t.clanId);g.lineStyle(3,color,.13);g.strokeRect(t.x-t.width/2,t.y-t.height/2,t.width,t.height);g.lineStyle(2,color,.7);const l=t.x-t.width/2,r=t.x+t.width/2,top=t.y-t.height/2,b=t.y+t.height/2;this.dash(g,l,top,r,top);this.dash(g,r,top,r,b);this.dash(g,r,b,l,b);this.dash(g,l,b,l,top)}
@@ -72,8 +72,9 @@ export class WorldRenderer {
   addBuilding(b){
     if(this.buildingObjects.has(b.id))return;
     const wall=["wall","wood_wall","stone_wall"].includes(b.type),totem=b.type==="clan_totem",door=b.type==="wood_door",chest=b.type==="chest"||b.type==="storage_chest",campfire=b.type==="campfire";
-    const width=totem?32:wall?38:door?22:chest?27:campfire?22:28,height=totem?64:wall?16:door?31:chest?22:campfire?12:25;
-    const depth=b.y+(totem?34:wall?10:door?18:chest?13:campfire?7:13);
+    const workbench=b.type==="workbench";
+    const width=totem?32:wall?38:door?22:chest?27:campfire?22:workbench?34:28,height=totem?64:wall?16:door?31:chest?22:campfire?12:workbench?22:25;
+    const depth=b.y+(totem?34:wall?10:door?18:chest?13:campfire?7:workbench?12:13);
     const shape=this.scene.add.graphics({x:b.x,y:b.y}).setDepth(depth);
     if(totem){
       const color=this.colorFor(b.clanId);
