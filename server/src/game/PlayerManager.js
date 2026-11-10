@@ -33,13 +33,13 @@ class PlayerManager {
     const seed = world?.seed || WORLD.seed;
     let spawn = { x: restored?.x, y: restored?.y };
     if (!Number.isFinite(spawn.x) || !Number.isFinite(spawn.y) ||
-        !canOccupy(seed, spawn.x, spawn.y, WORLD.width, WORLD.height, [...(world?.buildings?.values() || [])])) {
+        !(restored?.boat_state?.active && spawn.x >= 16 && spawn.y >= 16 && spawn.x <= WORLD.width - 16 && spawn.y <= WORLD.height - 16 && getBiomeAt(seed, spawn.x, spawn.y, world?.generationVersion) === "ocean") && !canOccupy(seed, spawn.x, spawn.y, WORLD.width, WORLD.height, [...(world?.buildings?.values() || [])], world?.generationVersion)) {
       spawn = null;
       const buildings = [...(world?.buildings?.values() || [])];
       for (let i = 0; i < 2000 && !spawn; i++) {
         const x = 80 + Math.random() * (WORLD.width - 160);
         const y = 80 + Math.random() * (WORLD.height - 160);
-        if (canOccupy(seed, x, y, WORLD.width, WORLD.height, buildings)) spawn = { x, y };
+        if (canOccupy(seed, x, y, WORLD.width, WORLD.height, buildings, world?.generationVersion)) spawn = { x, y };
       }
     }
     if (!spawn) spawn = { x: WORLD.width / 2, y: WORLD.height / 2 };
@@ -51,6 +51,7 @@ class PlayerManager {
       inventory: createInventory(),
       slots: Array.isArray(restored?.slots) && restored.slots.length ? restored.slots : emptySlots(),
       equipment: restored?.equipment || { tool: "primitive_stone" },
+      boat: restored?.boat_state && typeof restored.boat_state === "object" && restored.boat_state.active ? restored.boat_state : null,
       farmingXp: Number.isInteger(restored?.farming_xp) ? Math.max(0, restored.farming_xp) : 0,
       farmingQuests: restored?.farming_quests && typeof restored.farming_quests === "object" ? restored.farming_quests : {},
       lastInputAt: 0, subscribedChunks: new Set(), clanId: restored?.clan_id || null,
@@ -112,9 +113,9 @@ class PlayerManager {
       let dy = Number(player.input.down) - Number(player.input.up);
       const length = Math.hypot(dx, dy);
       if (length) { dx /= length; dy /= length; }
-      const biome = getBiomeAt(world?.seed || WORLD.seed, player.x, player.y);
+      const biome = getBiomeAt(world?.seed || WORLD.seed, player.x, player.y, world?.generationVersion);
       const factor = (BIOMES[biome]?.movement || 1) * (weather === "rain" ? 0.9 : 1);
-      const maxSpeed = speed * factor;
+      const maxSpeed = speed * factor * (player.boat?.active ? 0.84 : 1);
       const hasInput = length > 0;
       const acceleration = (hasInput ? 900 : 1200) * step;
       player.vx = approach(player.vx || 0, dx * maxSpeed, acceleration);
@@ -127,9 +128,14 @@ class PlayerManager {
       const collisionBuildings = nearby.filter(building =>
         !(building.type === "wood_door" &&
           (building.ownerId === player.id || (building.clanId && building.clanId === player.clanId))));
-      if (canOccupy(world?.seed || WORLD.seed, nextX, player.y, WORLD.width, WORLD.height, collisionBuildings)) player.x = nextX;
+      const canMoveTo = (x, y) => {
+        const targetBiome = getBiomeAt(world?.seed || WORLD.seed, x, y, world?.generationVersion);
+        if (targetBiome === "ocean") return !!player.boat?.active;
+        return canOccupy(world?.seed || WORLD.seed, x, y, WORLD.width, WORLD.height, collisionBuildings, world?.generationVersion);
+      };
+      if (canMoveTo(nextX, player.y)) player.x = nextX;
       else player.vx = 0;
-      if (canOccupy(world?.seed || WORLD.seed, player.x, nextY, WORLD.width, WORLD.height, collisionBuildings)) player.y = nextY;
+      if (canMoveTo(player.x, nextY)) player.y = nextY;
       else player.vy = 0;
       player.moveSpeed = Math.hypot(player.vx, player.vy);
 

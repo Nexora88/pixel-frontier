@@ -7,6 +7,7 @@ const { damageEquippedTool } = require("./InventoryRules");
 class WorldState {
   constructor(seed = WORLD.seed) {
     this.seed = seed;
+    this.generationVersion = WORLD.generationVersion || 1;
     this.resources = new Map();
     this.buildings = new Map();
     this.buildingsByChunk = new Map();
@@ -38,7 +39,7 @@ class WorldState {
   getChunk(cx, cy) {
     const key = `${cx},${cy}`;
     if (!this.chunks.has(key)) {
-      const chunk = generateChunk(this.seed, cx, cy);
+      const chunk = generateChunk(this.seed, cx, cy, this.generationVersion);
       if (!chunk) return null;
       chunk.farmPlots = Array.isArray(chunk.farmPlots) ? chunk.farmPlots : [];
       this.chunks.set(key, chunk);
@@ -83,8 +84,8 @@ class WorldState {
     if (player.equipment?.tool !== "wooden_hoe") return { ok: false, reason: "hoe-required" };
     const durability = player.equipment?.durability?.wooden_hoe;
     if (Number.isInteger(durability) && durability <= 0) return { ok: false, reason: "hoe-broken" };
-    const biome = getBiomeAt(this.seed, x, y);
-    if (biome === "lake" || biome === "mountain") return { ok: false, reason: "unsuitable-ground" };
+    const biome = getBiomeAt(this.seed, x, y, this.generationVersion);
+    if (biome === "lake" || biome === "ocean" || biome === "mountain") return { ok: false, reason: "unsuitable-ground" };
     const plotX = Math.round(x / 32) * 32, plotY = Math.round(y / 32) * 32;
     if (Math.hypot(player.x - plotX, player.y - plotY) > GAME.interactionRange * 1.5) return { ok: false, reason: "too-far" };
     const nearby = this.nearbyBuildings(plotX, plotY, 24);
@@ -237,6 +238,41 @@ class WorldState {
     return { ok: true, recipe: name, inventory: { ...player.inventory }, slots: player.slots };
   }
 
+  isNearCoast(player, range = 112) {
+    const step = 24;
+    for (let radius = 24; radius <= range; radius += step) {
+      for (let angle = 0; angle < Math.PI * 2; angle += Math.PI / 8) {
+        if (getBiomeAt(this.seed, player.x + Math.cos(angle) * radius, player.y + Math.sin(angle) * radius, this.generationVersion) === "ocean") return true;
+      }
+    }
+    return false;
+  }
+
+  launchBoat(player) {
+    if (player.boat?.active) return { ok: false, reason: "already-aboard" };
+    const biome = getBiomeAt(this.seed, player.x, player.y, this.generationVersion);
+    if (biome === "ocean" || biome === "lake" || biome === "mountain" || !this.isNearCoast(player)) return { ok: false, reason: "coast-required" };
+    const next = player.slots.map(slot => slot && ({ ...slot }));
+    const used = consumeFromSlots(next, { wooden_raft: 1 });
+    if (!used.ok) return { ok: false, reason: "raft-required" };
+    player.slots.splice(0, player.slots.length, ...next);
+    player.inventory = slotCounts(player.slots);
+    player.boat = { id: `raft_${player.id}_${Date.now()}`, active: true, durability: 100, launchedAt: Date.now() };
+    return { ok: true, boat: { ...player.boat }, inventory: { ...player.inventory }, slots: player.slots };
+  }
+
+  dockBoat(player) {
+    if (!player.boat?.active) return { ok: false, reason: "not-aboard" };
+    const biome = getBiomeAt(this.seed, player.x, player.y, this.generationVersion);
+    if (biome === "ocean" || !this.isNearCoast(player)) return { ok: false, reason: "shore-required" };
+    const added = addToSlots(player.slots, "wooden_raft", 1);
+    if (!added.ok) return added;
+    player.inventory = slotCounts(player.slots);
+    const boat = player.boat;
+    player.boat = null;
+    return { ok: true, docked: true, boat, inventory: { ...player.inventory }, slots: player.slots };
+  }
+
   build(player, type, x, y) {
     const canonical = type === "wall" ? "wood_wall" : type === "door" ? "wood_door" : type;
     const definition = BUILDINGS[canonical];
@@ -254,7 +290,7 @@ class WorldState {
       if (overlapsSafePerimeter) return { ok: false, reason: "safe-zone" };
     }
     const nearby = this.nearbyBuildings(buildX, buildY, 48);
-    if (!canOccupy(this.seed, buildX, buildY, WORLD.width, WORLD.height, nearby)) return { ok: false, reason: "blocked-position" };
+    if (!canOccupy(this.seed, buildX, buildY, WORLD.width, WORLD.height, nearby, this.generationVersion)) return { ok: false, reason: "blocked-position" };
     const costs = definition?.costs || (canonical === "campfire" ? { wood: 4, stone: 2 } : null);
     const used = consumeFromSlots(player.slots, costs);
     if (!used.ok) return used;

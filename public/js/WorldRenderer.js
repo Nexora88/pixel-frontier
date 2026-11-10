@@ -11,27 +11,32 @@ export class WorldRenderer {
       forest:{base:0x304a32,patch:0x49623a,detail:0x71804b,dark:0x243a2a},
       meadow:{base:0x657844,patch:0x7b8b4c,detail:0xa0a264,dark:0x4a6038},
       mountain:{base:0x62615a,patch:0x77766b,detail:0xa19a82,dark:0x494a47},
-      lake:{base:0x294e61,patch:0x35677a,detail:0x6a9ba0,dark:0x203e50}
+      lake:{base:0x294e61,patch:0x35677a,detail:0x6a9ba0,dark:0x203e50},
+      ocean:{base:0x244966,patch:0x315f7a,detail:0x82b4b6,dark:0x1b3a55}
     };
     const p=palettes[chunk.biome]||palettes.forest;
-    graphics.fillStyle(p.base,1).fillRect(chunk.x,chunk.y,chunk.width,chunk.height);
+    if(Array.isArray(chunk.terrainCells)&&chunk.terrainCells.length){for(const cell of chunk.terrainCells){const cp=palettes[cell.biome]||p;if(cell.coast){graphics.fillStyle(0xb69b68,1).fillRect(cell.x,cell.y,cell.size+1,cell.size+1);graphics.fillStyle(cp.base,1).fillRect(cell.x+3,cell.y+3,cell.size-5,cell.size-5)}else graphics.fillStyle(cp.base,1).fillRect(cell.x,cell.y,cell.size+1,cell.size+1)}}else graphics.fillStyle(p.base,1).fillRect(chunk.x,chunk.y,chunk.width,chunk.height);
     let seed=this.hash(`${this.seed}:${chunk.key}`);
     const random=()=>{seed=(seed*1664525+1013904223)>>>0;return seed/4294967296};
     // Static, seeded ground detail: small enough to stay cheap on low-end devices.
     for(let i=0;i<54;i++){
       const x=Math.floor((chunk.x+random()*chunk.width)/4)*4,y=Math.floor((chunk.y+random()*chunk.height)/4)*4;
-      const w=4+Math.floor(random()*12),h=3+Math.floor(random()*8);
-      graphics.fillStyle(random()>.48?p.patch:p.dark,.16+random()*.13).fillRect(x,y,w,h);
-      if(chunk.biome==="lake"&&i%3===0)graphics.lineStyle(1,p.detail,.25).lineBetween(x,y,x+w+8,y);
-      else if((chunk.biome==="forest"||chunk.biome==="meadow")&&i%4===0){
-        graphics.lineStyle(1,p.detail,.55).lineBetween(x,y+3,x+2,y-2);
+      const cellIndex=Math.floor((y-chunk.y)/25)*16+Math.floor((x-chunk.x)/25),cell=chunk.terrainCells?.[cellIndex];
+      if(chunk.terrainCells&&(!cell||cell.biome==="ocean"))continue;
+      const biome=cell?.biome||chunk.biome,cp=palettes[biome]||p,w=4+Math.floor(random()*12),h=3+Math.floor(random()*8);
+      graphics.fillStyle(random()>.48?cp.patch:cp.dark,.16+random()*.13).fillRect(x,y,w,h);
+      if(biome==="lake"&&i%3===0)graphics.lineStyle(1,cp.detail,.25).lineBetween(x,y,x+w+8,y);
+      else if((biome==="forest"||biome==="meadow")&&i%4===0){
+        graphics.lineStyle(1,cp.detail,.55).lineBetween(x,y+3,x+2,y-2);
         graphics.lineBetween(x+3,y+4,x+5,y);
-      }else if(chunk.biome==="mountain"&&i%4===0){
-        graphics.fillStyle(p.detail,.28).fillRect(x+2,y+1,5,2);
+      }else if(biome==="mountain"&&i%4===0){
+        graphics.fillStyle(cp.detail,.28).fillRect(x+2,y+1,5,2);
+      }else if(biome==="ocean"&&i%3===0){
+        graphics.lineStyle(1,cp.detail,.18).lineBetween(x,y,x+8,y);
       }
     }
     // Occasional worn stone remnants hint at an older civilization.
-    if(this.hash(chunk.key+this.seed)%4===0&&chunk.biome!=="lake"){
+    if(this.hash(chunk.key+this.seed)%4===0&&chunk.biome!=="lake"&&chunk.biome!=="ocean"){
       const rx=chunk.x+chunk.width*.52,ry=chunk.y+chunk.height*.48;
       graphics.fillStyle(0x2a2925,.22).fillEllipse(rx,ry+8,74,24);
       for(let n=0;n<5;n++){
@@ -41,7 +46,7 @@ export class WorldRenderer {
       }
     }
     graphics.lineStyle(1,0xd0c19a,.12).strokeRect(chunk.x,chunk.y,chunk.width,chunk.height);
-    const names={forest:"ESKİ ORMAN",lake:"SİS GÖLÜ",mountain:"TAŞ SIRTI",meadow:"YABAN OTLUĞU"};
+    const names={forest:"ESKİ ORMAN",lake:"SİS GÖLÜ",ocean:"AÇIK DENİZ",mountain:"TAŞ SIRTI",meadow:"YABAN OTLUĞU"};
     const label=this.scene.add.text(chunk.x+10,chunk.y+8,names[chunk.biome]||"SINIR TOPRAĞI",{
       fontFamily:"Georgia,serif",fontSize:"9px",color:"#ead8b4",backgroundColor:"#21180f99",padding:{x:4,y:3}
     }).setDepth(-8);

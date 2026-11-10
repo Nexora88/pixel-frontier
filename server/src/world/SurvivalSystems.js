@@ -88,10 +88,10 @@ class ChestStore {
     return { ok: true, playerSlots: player.slots, chestSlots: chest.slots };
   }
 }
-function canOccupy(seed, x, y, worldWidth, worldHeight, buildings = []) {
+function canOccupy(seed, x, y, worldWidth, worldHeight, buildings = [], terrainVersion) {
   if (x < 16 || y < 16 || x > worldWidth - 16 || y > worldHeight - 16) return false;
-  const biome = getBiomeAt(seed, x, y);
-  if (biome === "lake" || biome === "mountain") return false;
+  const biome = getBiomeAt(seed, x, y, terrainVersion);
+  if (biome === "lake" || biome === "ocean" || biome === "mountain") return false;
   return !buildings.some(b => b.solid !== false && Math.abs(b.x - x) < 22 && Math.abs(b.y - y) < 22);
 }
 class EnvironmentSimulation {
