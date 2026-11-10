@@ -1,4 +1,4 @@
-const { getBiomeAt } = require("./generateWorld");
+const { getBiomeAt, createRandom } = require("./generateWorld");
 const { ITEMS } = require("./ItemCatalog");
 
 const EQUIPMENT = Object.freeze({
@@ -95,15 +95,95 @@ function canOccupy(seed, x, y, worldWidth, worldHeight, buildings = [], terrainV
   return !buildings.some(b => b.solid !== false && Math.abs(b.x - x) < 22 && Math.abs(b.y - y) < 22);
 }
 class EnvironmentSimulation {
-  constructor(seed = "pixel-frontier", options = {}) { this.seed = seed; this.dayLengthMs = options.dayLengthMs || 24 * 60 * 1000; this.startedAt = options.startedAt ?? Date.now(); this.weather = "clear"; this.weatherChangedAt = this.startedAt; this.animals = new Map(); this.nextAnimal = 1; }
+  constructor(seed = "pixel-frontier", options = {}) {
+    this.seed = seed;
+    this.terrainVersion = options.terrainVersion || 2;
+    this.dayLengthMs = options.dayLengthMs || 24 * 60 * 1000;
+    this.startedAt = options.startedAt ?? Date.now();
+    this.weather = "clear";
+    this.weatherChangedAt = this.startedAt;
+    this.animals = new Map();
+    this.nextAnimal = 1;
+    this.random = createRandom(`${seed}:wildlife`);
+  }
   snapshot(now = Date.now()) {
     const phase = ((now - this.startedAt) % this.dayLengthMs) / this.dayLengthMs;
     const hour = Math.floor(phase * 24), weatherCycle = Math.floor((now - this.weatherChangedAt) / 180000);
     if (weatherCycle > 0) { const choices = ["clear", "cloudy", "rain"]; this.weather = choices[(Math.floor(now / 180000) + this.seed.length) % choices.length]; this.weatherChangedAt = now; }
     return { hour, day: Math.floor((now - this.startedAt) / this.dayLengthMs) + 1, isNight: hour < 6 || hour >= 19, weather: this.weather };
   }
-  spawnAnimal(x, y, biome = "forest") { const animal = { id: `animal_${this.nextAnimal++}`, species: biome === "meadow" ? "rabbit" : biome === "lake" ? "duck" : "deer", x, y, biome, vx: 0, vy: 0 }; this.animals.set(animal.id, animal); return animal; }
-  update(dt) { for (const animal of this.animals.values()) { if (Math.random() < 0.025) { animal.vx = (Math.random() - 0.5) * 18; animal.vy = (Math.random() - 0.5) * 18; } animal.x = Math.max(20, Math.min(3180, animal.x + animal.vx * dt)); animal.y = Math.max(20, Math.min(2380, animal.y + animal.vy * dt)); } }
+  spawnAnimal(x, y, biome = "forest") {
+    const species = biome === "meadow" ? "rabbit" : biome === "lake" || biome === "ocean" ? "duck" : "deer";
+    const animal = { id: `animal_${this.nextAnimal++}`, species, x, y, homeX:x, homeY:y, biome, vx:0, vy:0, trust:0, tamed:false, ownerId:null, hunger:100, affection:50, lastFedAt:Date.now(), lastCaredAt:null, wanderFor:0 };
+    this.animals.set(animal.id, animal);
+    return animal;
+  }
+  restoreState(state = {}) {
+    this.animals.clear();
+    for (const raw of Array.isArray(state.animals) ? state.animals : []) {
+      if (!raw?.id || !["deer","rabbit","duck"].includes(raw.species) || !Number.isFinite(raw.x) || !Number.isFinite(raw.y)) continue;
+      this.animals.set(raw.id, { trust:0, tamed:false, ownerId:null, hunger:100, affection:50, vx:0, vy:0, ...raw });
+    }
+    this.nextAnimal = Math.max(Number(state.nextAnimal)||1, ...[...this.animals.keys()].map(id=>Number(id.split("_").at(-1))+1||1));
+  }
+  exportState() { return { nextAnimal:this.nextAnimal, animals:[...this.animals.values()].map(animal=>({...animal})) }; }
+  feedAnimal(player, animalId) {
+    const animal = this.animals.get(animalId);
+    if (!animal) return { ok:false, reason:"animal-not-found" };
+    if (Math.hypot(player.x-animal.x,player.y-animal.y)>88) return { ok:false, reason:"animal-too-far" };
+    if (animal.tamed && animal.ownerId!==player.id) return { ok:false, reason:"animal-owned" };
+    const next=player.slots.map(slot=>slot&&({...slot}));
+    const used=consumeFromSlots(next,{berries:1});
+    if(!used.ok)return {ok:false,reason:"berries-required"};
+    player.slots.splice(0,player.slots.length,...next);
+    player.inventory=slotCounts(player.slots);
+    animal.hunger=100;animal.lastFedAt=Date.now();animal.affection=Math.min(100,(animal.affection||50)+12);
+    if(!animal.tamed){animal.trust=Math.min(3,(animal.trust||0)+1);if(animal.trust>=3){animal.tamed=true;animal.ownerId=player.id;animal.homeX=animal.x;animal.homeY=animal.y}}
+    return {ok:true,animal:{...animal},tamed:animal.tamed,inventory:{...player.inventory},slots:player.slots};
+  }
+  careAnimal(player, animalId) {
+    const animal=this.animals.get(animalId);
+    if(!animal)return{ok:false,reason:"animal-not-found"};
+    if(Math.hypot(player.x-animal.x,player.y-animal.y)>88)return{ok:false,reason:"animal-too-far"};
+    if(!animal.tamed||animal.ownerId!==player.id)return{ok:false,reason:"animal-not-owned"};
+    animal.affection=Math.min(100,(animal.affection||50)+18);
+    animal.hunger=Math.min(100,(animal.hunger||0)+8);
+    animal.lastCaredAt=Date.now();
+    return{ok:true,animal:{...animal}};
+  }
+  update(dt, players = []) {
+    const step=Math.max(0,Math.min(Number(dt)||0,.1)),online=new Map([...players].map(player=>[player.id,player]));
+    if(!step)return;
+    for(const animal of this.animals.values()){
+      animal.hunger=Math.max(0,(animal.hunger??100)-step*.0005);
+      let targetX=0,targetY=0,speed=0;
+      const owner=animal.tamed?online.get(animal.ownerId):null;
+      if(owner&&Math.hypot(owner.x-animal.x,owner.y-animal.y)>72){
+        const dx=owner.x-animal.x,dy=owner.y-animal.y,length=Math.hypot(dx,dy)||1;
+        targetX=dx/length;targetY=dy/length;speed=animal.species==="rabbit"?28:22;
+      }else{
+        const threat=[...online.values()].map(p=>({p,d:Math.hypot(p.x-animal.x,p.y-animal.y)})).filter(v=>v.d<100).sort((a,b)=>a.d-b.d)[0];
+        if(threat&&!animal.tamed){
+          const dx=animal.x-threat.p.x,dy=animal.y-threat.p.y,length=Math.hypot(dx,dy)||1;
+          targetX=dx/length;targetY=dy/length;speed=animal.species==="rabbit"?42:34;
+        }else{
+          animal.wanderFor=(animal.wanderFor||0)-step;
+          if(animal.wanderFor<=0){
+            const angle=this.random()*Math.PI*2;
+            animal.vx=Math.cos(angle);animal.vy=Math.sin(angle);
+            animal.wanderFor=1.2+this.random()*2.8;
+          }
+          targetX=animal.vx||0;targetY=animal.vy||0;speed=animal.species==="rabbit"?19:animal.species==="duck"?14:16;
+        }
+      }
+      const nextX=Math.max(20,Math.min(3180,animal.x+targetX*speed*step));
+      const nextY=Math.max(20,Math.min(2380,animal.y+targetY*speed*step));
+      const biome=getBiomeAt(this.seed,nextX,nextY,this.terrainVersion);
+      if(animal.species==="duck" ? biome!=="mountain" : biome!=="ocean"&&biome!=="mountain"){
+        animal.x=nextX;animal.y=nextY;animal.biome=biome;
+      }else{animal.vx=-(animal.vx||targetX);animal.vy=-(animal.vy||targetY);animal.wanderFor=0}
+    }
+  }
   nearbyAnimals(x, y, range = 500) { return [...this.animals.values()].filter(a => Math.hypot(a.x - x, a.y - y) <= range); }
 }
 class SocialSystems {
