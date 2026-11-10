@@ -138,6 +138,7 @@ export class ProximityVoice {
         this.net.emit("voice:signal", { to: from, signal: { type: "answer", sdp: peer.pc.localDescription } });
       } else if (signal.type === "answer" && !peer.pc.remoteDescription) {
         await peer.pc.setRemoteDescription(signal.sdp);
+        for (const candidate of peer.pendingCandidates.splice(0)) await peer.pc.addIceCandidate(candidate);
       } else if (signal.type === "candidate" && signal.candidate) {
         if (peer.pc.remoteDescription) await peer.pc.addIceCandidate(signal.candidate);
         else peer.pendingCandidates.push(signal.candidate);
