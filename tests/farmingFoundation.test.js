@@ -45,7 +45,9 @@ test("tilling rejects unsuitable terrain, distant positions and duplicate plots"
   const world = new WorldState("farm-foundation");
   const point = suitablePoint(world);
   const player = playerAt(point.x, point.y);
-  const farX = point.x < 1600 ? 3000 : 100;\n  const farY = point.y < 1200 ? 2200 : 100;\n  assert.equal(world.till(player, farX, farY).reason, "too-far");
+  const farX = point.x < 1600 ? 3000 : 100;
+  const farY = point.y < 1200 ? 2200 : 100;
+  assert.equal(world.till(player, farX, farY).reason, "too-far");
   let lake = null;
   for (let x = 16; x < 3200 && !lake; x += 32) {
     for (let y = 16; y < 2400; y += 32) {
