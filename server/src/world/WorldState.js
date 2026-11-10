@@ -49,7 +49,7 @@ class WorldState {
       ...chunk,
       resources: chunk.resources.filter(resource => this.resources.has(resource.id)),
       buildings: [...(this.buildingsByChunk.get(key)?.values() || [])],
-      farmPlots: [...(chunk.farmPlots || [])]
+      farmPlots: (chunk.farmPlots || []).map(plot => ({ ...plot, stage: this.cropStage(plot) }))
     };
   }
 
@@ -99,7 +99,113 @@ class WorldState {
     const toolWear = damageEquippedTool(player.equipment, 1);
     const plot = { id: `plot_${cx}_${cy}_${Date.now()}_${Math.random().toString(36).slice(2,7)}`, ownerId: player.id, x: plotX, y: plotY, chunkKey, state: "tilled", createdAt: Date.now() };
     chunk.farmPlots.push(plot);
-    return { ok: true, plot, equipment: player.equipment, toolWear };
+    return { ok: true, plot, equipment: player.equipment, toolWear, farming: this.recordFarmingAction(player, "till") };
+  }
+
+  recordFarmingAction(player, action, amount = 1) {
+    const definitions = {
+      till: { id: "prepare_soil", goal: 3, xp: 5 },
+      plant: { id: "plant_seeds", goal: 5, xp: 8 },
+      water: { id: "water_crops", goal: 3, xp: 4 },
+      harvest: { id: "harvest_crops", goal: 5, xp: 12 }
+    };
+    const definition = definitions[action];
+    if (!definition) return null;
+    player.farmingQuests ||= {};
+    const quest = player.farmingQuests[definition.id] || { progress: 0, goal: definition.goal, completed: false };
+    let bonusXp = 0;
+    if (!quest.completed) {
+      quest.progress = Math.min(definition.goal, quest.progress + amount);
+      if (quest.progress >= definition.goal) {
+        quest.completed = true;
+        quest.completedAt = Date.now();
+        bonusXp = 20;
+      }
+    }
+    player.farmingQuests[definition.id] = quest;
+    const earned = definition.xp * amount + bonusXp;
+    player.farmingXp = Math.max(0, (player.farmingXp || 0) + earned);
+    return {
+      earned,
+      xp: player.farmingXp,
+      level: Math.floor(player.farmingXp / 100) + 1,
+      quests: Object.entries(player.farmingQuests).map(([id, value]) => ({ id, ...value }))
+    };
+  }
+
+  cropStage(plot, now = Date.now()) {
+    if (!plot?.crop) return plot?.state || "tilled";
+    const duration = Math.max(60000, (plot.growthDurationMs || 600000) - (plot.growthBonusMs || 0));
+    const progress = Math.max(0, now - plot.plantedAt) / duration;
+    return progress >= 1 ? "ripe" : progress >= 0.66 ? "growing" : "seedling";
+  }
+
+  plant(player, plotId, seedItem) {
+    if (typeof plotId !== "string" || plotId.length > 100) return { ok: false, reason: "invalid-plot" };
+    const crops = { wheat_seed: "wheat", carrot_seed: "carrot" };
+    const crop = crops[seedItem];
+    if (!crop) return { ok: false, reason: "invalid-seed" };
+    let target = null;
+    for (const chunk of this.chunks.values()) {
+      const plot = (chunk.farmPlots || []).find(item => item.id === plotId);
+      if (plot) { target = { chunk, plot }; break; }
+    }
+    if (!target) return { ok: false, reason: "plot-not-found" };
+    const { plot } = target;
+    if (plot.ownerId !== player.id) return { ok: false, reason: "plot-not-owned" };
+    if (Math.hypot(player.x - plot.x, player.y - plot.y) > GAME.interactionRange * 1.5) return { ok: false, reason: "too-far" };
+    if (plot.crop) return { ok: false, reason: "already-planted" };
+    const next = player.slots.map(slot => slot && ({ ...slot }));
+    const used = consumeFromSlots(next, { [seedItem]: 1 });
+    if (!used.ok) return used;
+    player.slots.splice(0, player.slots.length, ...next);
+    player.inventory = slotCounts(player.slots);
+    Object.assign(plot, { crop, seedItem, plantedAt: Date.now(), growthDurationMs: 600000, growthBonusMs: 0, wateredAt: null });
+    return { ok: true, plot: { ...plot, stage: this.cropStage(plot) }, slots: player.slots, inventory: player.inventory, farming: this.recordFarmingAction(player, "plant") };
+  }
+
+  water(player, plotId) {
+    if (typeof plotId !== "string" || plotId.length > 100) return { ok: false, reason: "invalid-plot" };
+    const target = [...this.chunks.values()].flatMap(chunk => (chunk.farmPlots || []).map(plot => ({ chunk, plot }))).find(item => item.plot.id === plotId);
+    if (!target) return { ok: false, reason: "plot-not-found" };
+    const { plot } = target;
+    if (plot.ownerId !== player.id) return { ok: false, reason: "plot-not-owned" };
+    if (!plot.crop) return { ok: false, reason: "not-planted" };
+    if (this.cropStage(plot) === "ripe") return { ok: false, reason: "already-ripe" };
+    if (plot.wateredAt) return { ok: false, reason: "already-watered" };
+    if (Math.hypot(player.x - plot.x, player.y - plot.y) > GAME.interactionRange * 1.5) return { ok: false, reason: "too-far" };
+    if (player.equipment?.tool !== "wooden_watering_can") return { ok: false, reason: "watering-can-required" };
+    const durability = player.equipment?.durability?.wooden_watering_can;
+    if (Number.isInteger(durability) && durability <= 0) return { ok: false, reason: "watering-can-broken" };
+    const toolWear = damageEquippedTool(player.equipment, 1);
+    plot.wateredAt = Date.now();
+    plot.growthBonusMs = 300000;
+    return { ok: true, plot: { ...plot, stage: this.cropStage(plot) }, equipment: player.equipment, toolWear, farming: this.recordFarmingAction(player, "water") };
+  }
+
+  harvest(player, plotId) {
+    if (typeof plotId !== "string" || plotId.length > 100) return { ok: false, reason: "invalid-plot" };
+    const target = [...this.chunks.values()].flatMap(chunk => (chunk.farmPlots || []).map(plot => ({ chunk, plot }))).find(item => item.plot.id === plotId);
+    if (!target) return { ok: false, reason: "plot-not-found" };
+    const { plot } = target;
+    if (plot.ownerId !== player.id) return { ok: false, reason: "plot-not-owned" };
+    if (!plot.crop) return { ok: false, reason: "not-planted" };
+    if (this.cropStage(plot) !== "ripe") return { ok: false, reason: "not-ripe" };
+    if (Math.hypot(player.x - plot.x, player.y - plot.y) > GAME.interactionRange * 1.5) return { ok: false, reason: "too-far" };
+    const crop = plot.crop, seedItem = plot.seedItem;
+    const next = player.slots.map(slot => slot && ({ ...slot }));
+    const amount = 2 + (plot.wateredAt ? 1 : 0);
+    const added = addToSlots(next, crop, amount);
+    if (!added.ok) return added;
+    if (Math.random() < 0.5) {
+      const seedAdded = addToSlots(next, seedItem, 1);
+      if (!seedAdded.ok) return seedAdded;
+    }
+    player.slots.splice(0, player.slots.length, ...next);
+    player.inventory = slotCounts(player.slots);
+    const chunk = target.chunk;
+    chunk.farmPlots = chunk.farmPlots.filter(item => item.id !== plotId);
+    return { ok: true, crop, amount, slots: player.slots, inventory: player.inventory, chunkKey: plot.chunkKey, farming: this.recordFarmingAction(player, "harvest", amount) };
   }
 
   gather(player, id) {
