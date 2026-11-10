@@ -37,3 +37,16 @@ html,body{font-family:Georgia,"Trebuchet MS",serif;background:#211b14}
 @media(max-width:700px){.topbar{height:54px;padding:0 10px}.brand{font-size:9px;gap:6px}.brand small{font-size:7px}.world-meta{font-size:8px;gap:5px}.hud{top:62px;left:7px;width:min(46vw,220px);max-height:calc(100vh - 80px);gap:6px}.hud-card{padding:8px}.quest-panel{padding:9px}.quest-panel p{font-size:9px}.quest-panel li{font-size:9px}.quest-heading strong{font-size:13px}.inventory-grid{gap:3px}.slot{min-height:31px;font-size:7px}.action-panel{top:auto;right:7px;bottom:34px;width:min(47vw,220px);max-height:55vh;padding:9px}.action-section-label{margin:8px 0 5px}.build-actions{gap:4px}.build-button{padding:7px;font-size:9px}.build-button small{font-size:7px}.dominance-panel{top:62px;right:7px;width:145px;padding:7px}.dominance-panel .eyebrow{font-size:7px}.bottom-hint{left:8px;bottom:10px;font-size:6px}.chest-panel{top:48%}}
 
 .quest-panel li.optional{color:#b9a47e;font-style:italic}.quest-panel li.optional:before{content:"＋";color:#c8a46b}
+
+/* Living-world audio settings */
+.audio-panel{position:absolute;z-index:8;left:50%;bottom:16px;transform:translateX(-50%);font-family:Georgia,serif;pointer-events:auto}
+.audio-toggle{border:1px solid #a17a48;background:#2d2116eF;color:#f0d7a9;padding:8px 13px;border-radius:3px;font:10px Georgia,serif;letter-spacing:.08em;cursor:pointer;box-shadow:0 4px 18px #0008}
+.audio-toggle:hover,.audio-toggle[aria-expanded=true]{border-color:#e0b86e;background:#4b351f}
+.audio-controls{width:min(300px,88vw);margin-bottom:7px;padding:13px;background:linear-gradient(145deg,#392b1d,#21180f);border:1px solid #a17a48;box-shadow:0 12px 35px #0009;color:#f0dfbd}
+.audio-controls[hidden]{display:none}.audio-controls strong{display:block;color:#e6bd79;font-size:13px;margin-bottom:10px}
+.audio-controls label{display:grid;grid-template-columns:1fr auto;gap:5px 10px;margin:9px 0;color:#e7d4b2;font-size:11px}
+.audio-controls output{color:#e0b86e;font-variant-numeric:tabular-nums}
+.audio-controls input{grid-column:1/-1;width:100%;accent-color:#d6a65f}
+.audio-controls p{margin:10px 0 6px;color:#e0c28e;font-size:10px;line-height:1.4}
+.audio-controls small{color:#bda783;font-size:9px;line-height:1.4}
+@media(max-width:700px){.audio-panel{bottom:7px;left:50%;}.audio-toggle{padding:7px 10px;font-size:9px}.audio-controls{max-height:50vh;overflow:auto}}
