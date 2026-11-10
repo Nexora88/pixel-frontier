@@ -50,6 +50,8 @@ class PlayerManager {
       inventory: createInventory(),
       slots: Array.isArray(restored?.slots) && restored.slots.length ? restored.slots : emptySlots(),
       equipment: restored?.equipment || { tool: "primitive_stone" },
+      farmingXp: Number.isInteger(restored?.farming_xp) ? Math.max(0, restored.farming_xp) : 0,
+      farmingQuests: restored?.farming_quests && typeof restored.farming_quests === "object" ? restored.farming_quests : {},
       lastInputAt: 0, subscribedChunks: new Set(), clanId: restored?.clan_id || null,
       spawnProtectionUntil: restored ? 0 : Date.now() + 15000
     };
