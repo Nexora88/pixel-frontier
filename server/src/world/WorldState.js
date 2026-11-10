@@ -238,6 +238,41 @@ class WorldState {
     return { ok: true, recipe: name, inventory: { ...player.inventory }, slots: player.slots };
   }
 
+  isNearCoast(player, range = 112) {
+    const step = 24;
+    for (let radius = 24; radius <= range; radius += step) {
+      for (let angle = 0; angle < Math.PI * 2; angle += Math.PI / 8) {
+        if (getBiomeAt(this.seed, player.x + Math.cos(angle) * radius, player.y + Math.sin(angle) * radius, this.generationVersion) === "ocean") return true;
+      }
+    }
+    return false;
+  }
+
+  launchBoat(player) {
+    if (player.boat?.active) return { ok: false, reason: "already-aboard" };
+    const biome = getBiomeAt(this.seed, player.x, player.y, this.generationVersion);
+    if (biome === "ocean" || biome === "lake" || biome === "mountain" || !this.isNearCoast(player)) return { ok: false, reason: "coast-required" };
+    const next = player.slots.map(slot => slot && ({ ...slot }));
+    const used = consumeFromSlots(next, { wooden_raft: 1 });
+    if (!used.ok) return { ok: false, reason: "raft-required" };
+    player.slots.splice(0, player.slots.length, ...next);
+    player.inventory = slotCounts(player.slots);
+    player.boat = { id: `raft_${player.id}_${Date.now()}`, active: true, durability: 100, launchedAt: Date.now() };
+    return { ok: true, boat: { ...player.boat }, inventory: { ...player.inventory }, slots: player.slots };
+  }
+
+  dockBoat(player) {
+    if (!player.boat?.active) return { ok: false, reason: "not-aboard" };
+    const biome = getBiomeAt(this.seed, player.x, player.y, this.generationVersion);
+    if (biome === "ocean" || !this.isNearCoast(player)) return { ok: false, reason: "shore-required" };
+    const added = addToSlots(player.slots, "wooden_raft", 1);
+    if (!added.ok) return added;
+    player.inventory = slotCounts(player.slots);
+    const boat = player.boat;
+    player.boat = null;
+    return { ok: true, boat, inventory: { ...player.inventory }, slots: player.slots };
+  }
+
   build(player, type, x, y) {
     const canonical = type === "wall" ? "wood_wall" : type === "door" ? "wood_door" : type;
     const definition = BUILDINGS[canonical];
