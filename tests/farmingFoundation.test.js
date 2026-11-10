@@ -3,7 +3,7 @@ const assert = require("node:assert/strict");
 const { WorldState } = require("../server/src/world/WorldState");
 const { emptySlots } = require("../server/src/world/SurvivalSystems");
 
-function playerAt(world, x = 100, y = 100) {
+function suitablePoint(world) {\n  const { getBiomeAt } = require("../server/src/world/generateWorld");\n  for (let x=32;x<3200;x+=32) for(let y=32;y<2400;y+=32) { const biome=getBiomeAt(world.seed,x,y); if(biome==="forest"||biome==="meadow") return {x,y}; }\n  throw new Error("No suitable test ground found");\n}\n\nfunction playerAt(world, x = 100, y = 100) {
   return { id: "farmer-1", x, y, slots: emptySlots(), inventory: {}, equipment: { tool: "wooden_hoe" } };
 }
 
@@ -15,7 +15,7 @@ test("a crafted and equipped hoe tills suitable ground and loses one durability"
   assert.equal(result.plot.state, "tilled");
   assert.equal(result.plot.ownerId, player.id);
   assert.equal(player.equipment.durability.wooden_hoe, 59);
-  assert.equal(world.getChunk(0, 0).farmPlots.length, 1);
+  assert.equal(world.getChunk(Math.floor(point.x/400), Math.floor(point.y/400)).farmPlots.length, 1);
 });
 
 test("tilling rejects missing or broken hoes without creating plots", () => {
