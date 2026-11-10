@@ -270,7 +270,7 @@ class WorldState {
     player.inventory = slotCounts(player.slots);
     const boat = player.boat;
     player.boat = null;
-    return { ok: true, boat, inventory: { ...player.inventory }, slots: player.slots };
+    return { ok: true, docked: true, boat, inventory: { ...player.inventory }, slots: player.slots };
   }
 
   build(player, type, x, y) {
