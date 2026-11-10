@@ -92,6 +92,8 @@ class PlayerManager {
       } else {
         delete out.inventory;
         delete out.slots;
+        delete out.farmingXp;
+        delete out.farmingQuests;
         out.equipment = { tool: player.equipment?.tool || null };
       }
       return out;
