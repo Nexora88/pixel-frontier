@@ -21,18 +21,22 @@ export class WorldRenderer {
     // Static, seeded ground detail: small enough to stay cheap on low-end devices.
     for(let i=0;i<54;i++){
       const x=Math.floor((chunk.x+random()*chunk.width)/4)*4,y=Math.floor((chunk.y+random()*chunk.height)/4)*4;
-      const w=4+Math.floor(random()*12),h=3+Math.floor(random()*8);
-      graphics.fillStyle(random()>.48?p.patch:p.dark,.16+random()*.13).fillRect(x,y,w,h);
-      if(chunk.biome==="lake"&&i%3===0)graphics.lineStyle(1,p.detail,.25).lineBetween(x,y,x+w+8,y);
-      else if((chunk.biome==="forest"||chunk.biome==="meadow")&&i%4===0){
-        graphics.lineStyle(1,p.detail,.55).lineBetween(x,y+3,x+2,y-2);
+      const cellIndex=Math.floor((y-chunk.y)/25)*16+Math.floor((x-chunk.x)/25),cell=chunk.terrainCells?.[cellIndex];
+      if(chunk.terrainCells&&(!cell||cell.biome==="ocean"))continue;
+      const biome=cell?.biome||chunk.biome,cp=palettes[biome]||p,w=4+Math.floor(random()*12),h=3+Math.floor(random()*8);
+      graphics.fillStyle(random()>.48?cp.patch:cp.dark,.16+random()*.13).fillRect(x,y,w,h);
+      if(biome==="lake"&&i%3===0)graphics.lineStyle(1,cp.detail,.25).lineBetween(x,y,x+w+8,y);
+      else if((biome==="forest"||biome==="meadow")&&i%4===0){
+        graphics.lineStyle(1,cp.detail,.55).lineBetween(x,y+3,x+2,y-2);
         graphics.lineBetween(x+3,y+4,x+5,y);
-      }else if(chunk.biome==="mountain"&&i%4===0){
-        graphics.fillStyle(p.detail,.28).fillRect(x+2,y+1,5,2);
+      }else if(biome==="mountain"&&i%4===0){
+        graphics.fillStyle(cp.detail,.28).fillRect(x+2,y+1,5,2);
+      }else if(biome==="ocean"&&i%3===0){
+        graphics.lineStyle(1,cp.detail,.18).lineBetween(x,y,x+8,y);
       }
     }
     // Occasional worn stone remnants hint at an older civilization.
-    if(this.hash(chunk.key+this.seed)%4===0&&chunk.biome!=="lake"){
+    if(this.hash(chunk.key+this.seed)%4===0&&chunk.biome!=="lake"&&chunk.biome!=="ocean"){
       const rx=chunk.x+chunk.width*.52,ry=chunk.y+chunk.height*.48;
       graphics.fillStyle(0x2a2925,.22).fillEllipse(rx,ry+8,74,24);
       for(let n=0;n<5;n++){
