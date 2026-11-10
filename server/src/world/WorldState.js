@@ -85,7 +85,7 @@ class WorldState {
     const durability = player.equipment?.durability?.wooden_hoe;
     if (Number.isInteger(durability) && durability <= 0) return { ok: false, reason: "hoe-broken" };
     const biome = getBiomeAt(this.seed, x, y, this.generationVersion);
-    if (biome === "lake" || biome === "mountain") return { ok: false, reason: "unsuitable-ground" };
+    if (biome === "lake" || biome === "ocean" || biome === "mountain") return { ok: false, reason: "unsuitable-ground" };
     const plotX = Math.round(x / 32) * 32, plotY = Math.round(y / 32) * 32;
     if (Math.hypot(player.x - plotX, player.y - plotY) > GAME.interactionRange * 1.5) return { ok: false, reason: "too-far" };
     const nearby = this.nearbyBuildings(plotX, plotY, 24);
