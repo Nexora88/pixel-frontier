@@ -7,6 +7,7 @@ const { damageEquippedTool } = require("./InventoryRules");
 class WorldState {
   constructor(seed = WORLD.seed) {
     this.seed = seed;
+    this.generationVersion = WORLD.generationVersion || 1;
     this.resources = new Map();
     this.buildings = new Map();
     this.buildingsByChunk = new Map();
@@ -38,7 +39,7 @@ class WorldState {
   getChunk(cx, cy) {
     const key = `${cx},${cy}`;
     if (!this.chunks.has(key)) {
-      const chunk = generateChunk(this.seed, cx, cy);
+      const chunk = generateChunk(this.seed, cx, cy, this.generationVersion);
       if (!chunk) return null;
       chunk.farmPlots = Array.isArray(chunk.farmPlots) ? chunk.farmPlots : [];
       this.chunks.set(key, chunk);
@@ -83,7 +84,7 @@ class WorldState {
     if (player.equipment?.tool !== "wooden_hoe") return { ok: false, reason: "hoe-required" };
     const durability = player.equipment?.durability?.wooden_hoe;
     if (Number.isInteger(durability) && durability <= 0) return { ok: false, reason: "hoe-broken" };
-    const biome = getBiomeAt(this.seed, x, y);
+    const biome = getBiomeAt(this.seed, x, y, this.generationVersion);
     if (biome === "lake" || biome === "mountain") return { ok: false, reason: "unsuitable-ground" };
     const plotX = Math.round(x / 32) * 32, plotY = Math.round(y / 32) * 32;
     if (Math.hypot(player.x - plotX, player.y - plotY) > GAME.interactionRange * 1.5) return { ok: false, reason: "too-far" };
@@ -254,7 +255,7 @@ class WorldState {
       if (overlapsSafePerimeter) return { ok: false, reason: "safe-zone" };
     }
     const nearby = this.nearbyBuildings(buildX, buildY, 48);
-    if (!canOccupy(this.seed, buildX, buildY, WORLD.width, WORLD.height, nearby)) return { ok: false, reason: "blocked-position" };
+    if (!canOccupy(this.seed, buildX, buildY, WORLD.width, WORLD.height, nearby, this.generationVersion)) return { ok: false, reason: "blocked-position" };
     const costs = definition?.costs || (canonical === "campfire" ? { wood: 4, stone: 2 } : null);
     const used = consumeFromSlots(player.slots, costs);
     if (!used.ok) return used;
