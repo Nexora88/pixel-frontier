@@ -152,15 +152,15 @@ export class ProximityVoice {
     if (!this.peerList) return;
     this.peerList.replaceChildren();
     for (const player of players) {
-      const peer = this.peers.get(player.id);
       const row = document.createElement("li");
       const label = document.createElement("span");
       label.textContent = player.name || "Gezgin";
       const mute = document.createElement("button");
       mute.type = "button";
-      mute.textContent = peer?.muted ? "Sesi aç" : "Sessize al";
+      mute.textContent = "Sessize al";
       mute.addEventListener("click", () => {
-        if (!peer) return;
+        const peer = this.peers.get(player.id);
+        if (!peer) { mute.textContent = "Bağlantı bekleniyor"; return; }
         peer.muted = !peer.muted;
         peer.audio.muted = peer.muted;
         mute.textContent = peer.muted ? "Sesi aç" : "Sessize al";
