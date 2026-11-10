@@ -29,7 +29,7 @@ export class WorldScene extends Phaser.Scene {
     const dx=d.x-p.x,dy=d.y-p.y,moving=Math.abs(dx)+Math.abs(dy)>.25;if(moving){if(Math.abs(dx)>Math.abs(dy))p.direction=dx<0?"left":"right";else p.direction=dy<0?"up":"down";const a=`survivor-walk-${p.direction}`;if(p.body.anims.currentAnim?.key!==a)p.body.play(a,true)}else{p.body.anims.stop();p.body.setFrame(({down:0,left:4,right:8,up:12})[p.direction])}
     p.body.setPosition(d.x,d.y).setDepth(d.y);p.label.setPosition(d.x,d.y-23).setDepth(d.y+1).setText(d.id===this.localId?"SEN":(d.name||"GEZGİN"));
     const ally=!!this.localClanId&&d.clanId===this.localClanId,enemy=!!this.localClanId&&!!d.clanId&&d.clanId!==this.localClanId;p.label.setColor(ally?"#8dff9b":enemy?"#ff6666":"#ffffff");
-    const frames={primitive_stone:12,wooden_axe:13,wooden_pickaxe:14,advanced_pickaxe:14,iron_sword:13};if(d.equipment?.tool&&p.tool)p.tool.setFrame(frames[d.equipment.tool]??12).setPosition(d.x+8,d.y+1).setDepth(d.y+2).setVisible(true);else if(p.tool)p.tool.setVisible(false);
+    const frames={primitive_stone:12,wooden_axe:13,wooden_pickaxe:14,wooden_hoe:16,advanced_pickaxe:14,iron_sword:13};if(d.equipment?.tool&&p.tool)p.tool.setFrame(frames[d.equipment.tool]??12).setPosition(d.x+12,d.y+4).setDepth(d.y+2).setVisible(true);else if(p.tool)p.tool.setVisible(false);
     p.x=d.x;p.y=d.y;if(d.id===this.localId){const sig=JSON.stringify([d.inventory,d.slots,d.equipment]);if(sig!==p.inventorySignature){p.inventorySignature=sig;this.events.emit("inventory",{inventory:d.inventory,slots:d.slots,equipment:d.equipment})}}
   }
   remove(id){const p=this.players.get(id);if(!p)return;p.body.destroy();p.label.destroy();p.tool?.destroy();this.players.delete(id)}
