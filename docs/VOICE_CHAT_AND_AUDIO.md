@@ -37,3 +37,7 @@ Bu PR, gerçek oyuncular arasında opt-in WebRTC bas-konuş için istemci ve sun
 - `public/assets/audio/hearth-of-the-new-home.mp3` — yerleşim
 
 Dosyalar eklenmeden müzik oynatma testi başarılı sayılmamalıdır. Suno planının üretim tarihindeki kullanım/ticari hakları ayrıca kontrol edilmelidir.
+
+## Birleştirme kapısı
+
+Bu modül temel entegrasyon aşamasıdır. `npm run check` ve `npm test` geçmeden birleştirilmemelidir. Gerçek oyuncularla iki ayrı cihazda ses iletimi, mikrofon izni reddi, yeniden bağlanma, engelleme ve mobil tarayıcı kontrolleri ayrıca yapılmalıdır. Üretim yayını öncesinde TURN yapılandırması ve kalabalık bölgede ağ/CPU ölçümü zorunludur.
