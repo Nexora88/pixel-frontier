@@ -47,6 +47,7 @@ class PlayerManager {
       id, socketId, name: restored?.name || `Survivor-${id.slice(0, 4)}`,
       x: spawn.x, y: spawn.y, color: COLORS[Math.floor(Math.random() * COLORS.length)],
       input: { up: false, down: false, left: false, right: false },
+      vx: 0, vy: 0,
       inventory: createInventory(),
       slots: Array.isArray(restored?.slots) && restored.slots.length ? restored.slots : emptySlots(),
       equipment: restored?.equipment || { tool: "primitive_stone" },
@@ -101,6 +102,11 @@ class PlayerManager {
   }
 
   update(dt, speed, world, weather) {
+    const step = Math.max(0, Math.min(Number(dt) || 0, 0.1));
+    if (!step) return;
+    const approach = (value, target, amount) => value < target
+      ? Math.min(target, value + amount)
+      : Math.max(target, value - amount);
     for (const player of this.players.values()) {
       let dx = Number(player.input.right) - Number(player.input.left);
       let dy = Number(player.input.down) - Number(player.input.up);
@@ -108,14 +114,24 @@ class PlayerManager {
       if (length) { dx /= length; dy /= length; }
       const biome = getBiomeAt(world?.seed || WORLD.seed, player.x, player.y);
       const factor = (BIOMES[biome]?.movement || 1) * (weather === "rain" ? 0.9 : 1);
-      const nextX = player.x + dx * speed * factor * dt;
-      const nextY = player.y + dy * speed * factor * dt;
+      const maxSpeed = speed * factor;
+      const hasInput = length > 0;
+      const acceleration = (hasInput ? 900 : 1200) * step;
+      player.vx = approach(player.vx || 0, dx * maxSpeed, acceleration);
+      player.vy = approach(player.vy || 0, dy * maxSpeed, acceleration);
+      if (Math.abs(player.vx) < 0.5 && !hasInput) player.vx = 0;
+      if (Math.abs(player.vy) < 0.5 && !hasInput) player.vy = 0;
+      const nextX = player.x + player.vx * step;
+      const nextY = player.y + player.vy * step;
       const nearby = world?.nearbyBuildings ? world.nearbyBuildings(player.x, player.y, 48) : [...(world?.buildings?.values() || [])];
       const collisionBuildings = nearby.filter(building =>
         !(building.type === "wood_door" &&
           (building.ownerId === player.id || (building.clanId && building.clanId === player.clanId))));
       if (canOccupy(world?.seed || WORLD.seed, nextX, player.y, WORLD.width, WORLD.height, collisionBuildings)) player.x = nextX;
+      else player.vx = 0;
       if (canOccupy(world?.seed || WORLD.seed, player.x, nextY, WORLD.width, WORLD.height, collisionBuildings)) player.y = nextY;
+      else player.vy = 0;
+      player.moveSpeed = Math.hypot(player.vx, player.vy);
 
       const nextChunkKey = this.chunkKey(player.x, player.y);
       if (nextChunkKey !== player.chunkKey) {
