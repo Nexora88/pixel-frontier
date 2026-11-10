@@ -13,8 +13,11 @@ This milestone prepares the movement layer for later boats, swimming, wildlife i
 ## Client presentation
 - Remote survivors interpolate toward authoritative snapshot positions.
 - Directional walk animation follows replicated velocity, with speed-scaled playback.
+- Nearby animal movement is interpolated; wildlife has a subtle idle/breathing motion.
+- Rafts rock gently while sailing, and ocean/lake cells receive low-cost animated water glints.
+- Existing tree canopy sway remains active near the player.
 - Idle retains the last facing direction and uses the matching idle frame.
-- This is a presentation foundation, not the final character-art pass. Expanded idle, tool-use, farming, boat, swim and animal-interaction sprite sets belong in the later visual milestone.
+- This is a presentation foundation, not the final character-art pass. Expanded idle, tool-use, farming, boat-paddling, swimming and animal-interaction sprite sets belong in the later visual milestone.
 
 ## Validation still required
 Run `npm test` and `npm run check`, then test movement and collision on desktop and mobile. Measure snapshot smoothness with multiple nearby players. Do not treat this foundation as a completed boat/swimming physics system.
