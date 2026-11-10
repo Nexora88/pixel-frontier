@@ -1,6 +1,6 @@
 export class WorldRenderer {
   constructor(scene) {
-    this.scene=scene;this.resourceObjects=new Map();this.buildingObjects=new Map();this.chunkObjects=new Map();
+    this.scene=scene;this.resourceObjects=new Map();this.buildingObjects=new Map();this.chunkObjects=new Map();this.farmPlotObjects=new Map();
     this.territoryGraphics=scene.add.graphics().setDepth(-4);
   }
   drawGround(width,height,seed){this.worldWidth=width;this.worldHeight=height;this.seed=seed}
@@ -46,12 +46,24 @@ export class WorldRenderer {
       fontFamily:"Georgia,serif",fontSize:"9px",color:"#ead8b4",backgroundColor:"#21180f99",padding:{x:4,y:3}
     }).setDepth(-8);
     this.chunkObjects.set(chunk.key,{ground:graphics,label});
-    chunk.resources.forEach(r=>this.addResource(r));chunk.buildings.forEach(b=>this.addBuilding(b));
+    chunk.resources.forEach(r=>this.addResource(r));chunk.buildings.forEach(b=>this.addBuilding(b));(chunk.farmPlots||[]).forEach(plot=>this.addFarmPlot(plot));
   }
   removeChunk(key){
     const chunk=this.chunkObjects.get(key);if(chunk){chunk.ground.destroy();chunk.label.destroy();this.chunkObjects.delete(key)}
     for(const[id,o]of this.resourceObjects)if(o.chunkKey===key)this.removeResource(id);
     for(const[id,o]of this.buildingObjects)if(o.chunkKey===key){o.shape.destroy();o.shadow?.destroy();o.glow?.destroy();this.buildingObjects.delete(id)}
+    for(const[id,o]of this.farmPlotObjects)if(o.chunkKey===key){o.destroy();this.farmPlotObjects.delete(id)}
+  }
+  addFarmPlot(plot){
+    if(!plot?.id||this.farmPlotObjects.has(plot.id))return;
+    const g=this.scene.add.graphics().setDepth(plot.y-1);
+    g.fillStyle(0x332218,0.45).fillEllipse(plot.x,plot.y+12,34,10);
+    g.fillStyle(0x65452b,1).fillRect(plot.x-14,plot.y-13,28,26);
+    g.fillStyle(0x8b633d,1).fillRect(plot.x-12,plot.y-11,24,22);
+    g.fillStyle(0x4c3321,1);
+    for(let row=0;row<4;row++)g.fillRect(plot.x-11,plot.y-9+row*6,22,2);
+    g.lineStyle(1,0x2e2118,0.9).strokeRect(plot.x-14,plot.y-13,28,26);
+    this.farmPlotObjects.set(plot.id,g);
   }
   addResource(r){
     if(this.resourceObjects.has(r.id))return;
@@ -112,5 +124,5 @@ export class WorldRenderer {
   }
   addBuildings(items){items.forEach(b=>this.addBuilding(b))}
   hash(value){let h=2166136261;for(const c of String(value)){h^=c.charCodeAt(0);h=Math.imul(h,16777619)}return h>>>0}
-  destroy(){for(const chunk of this.chunkObjects.values()){chunk.ground.destroy();chunk.label.destroy()}for(const o of this.resourceObjects.values()){o.shape.destroy();o.shadow.destroy();o.canopy?.destroy()}for(const o of this.buildingObjects.values()){o.shape.destroy();o.shadow.destroy();o.glow?.destroy()}this.chunkObjects.clear();this.resourceObjects.clear();this.buildingObjects.clear();this.territoryGraphics.destroy()}
+  destroy(){for(const chunk of this.chunkObjects.values()){chunk.ground.destroy();chunk.label.destroy()}for(const o of this.resourceObjects.values()){o.shape.destroy();o.shadow.destroy();o.canopy?.destroy()}for(const o of this.buildingObjects.values()){o.shape.destroy();o.shadow.destroy();o.glow?.destroy()}for(const o of this.farmPlotObjects.values())o.destroy();this.farmPlotObjects.clear();this.chunkObjects.clear();this.resourceObjects.clear();this.buildingObjects.clear();this.territoryGraphics.destroy()}
 }

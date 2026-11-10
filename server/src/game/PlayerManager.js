@@ -90,7 +90,7 @@ class PlayerManager {
       } else {
         delete out.inventory;
         delete out.slots;
-        delete out.equipment;
+        out.equipment = { tool: player.equipment?.tool || null };
       }
       return out;
     });
