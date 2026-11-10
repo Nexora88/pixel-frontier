@@ -50,3 +50,19 @@ html,body{font-family:Georgia,"Trebuchet MS",serif;background:#211b14}
 .audio-controls p{margin:10px 0 6px;color:#e0c28e;font-size:10px;line-height:1.4}
 .audio-controls small{color:#bda783;font-size:9px;line-height:1.4}
 @media(max-width:700px){.audio-panel{bottom:7px;left:50%;}.audio-toggle{padding:7px 10px;font-size:9px}.audio-controls{max-height:50vh;overflow:auto}}
+
+
+/* Opt-in proximity push-to-talk */
+.voice-chat{position:absolute;z-index:9;right:20px;bottom:16px;width:min(320px,calc(100vw - 24px));padding:12px;background:linear-gradient(145deg,#392b1d,#21180f);border:1px solid #a17a48;box-shadow:0 10px 30px #0009;color:#f0dfbd;font:11px Georgia,serif}
+.voice-chat strong{display:block;color:#e6bd79;font-size:13px;margin-bottom:6px}
+.voice-note{color:#cdb58d;font-size:10px;line-height:1.4;margin:5px 0 9px}
+.voice-chat button{border:1px solid #987044;background:#51391f;color:#f4e6c9;padding:7px 9px;margin:2px;font:10px Georgia,serif;cursor:pointer}
+.voice-chat button:disabled{opacity:.45;cursor:not-allowed}
+.voice-chat #voice-ptt{width:100%;font-weight:bold;touch-action:none;user-select:none}
+.voice-chat #voice-ptt.talking{background:#80602f;border-color:#f0c36d;box-shadow:0 0 0 2px #e0b86e55}
+#voice-status{color:#d7bd91;font-size:9px;margin:7px 2px}
+#voice-peers{list-style:none;padding:0;margin:5px 0 0;display:grid;gap:4px}
+#voice-peers li{display:flex;align-items:center;gap:4px;flex-wrap:wrap;border-top:1px solid #80613b55;padding-top:5px}
+#voice-peers li span{flex:1;min-width:70px}
+#voice-peers li button{font-size:9px;padding:4px 6px}
+@media(max-width:700px){.voice-chat{right:7px;bottom:7px;width:min(47vw,220px);padding:8px}.voice-chat strong{font-size:11px}.voice-note{font-size:8px}.voice-chat button{font-size:8px;padding:6px}.voice-chat #voice-ptt{min-height:38px}}
