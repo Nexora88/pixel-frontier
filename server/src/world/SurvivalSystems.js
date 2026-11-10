@@ -132,6 +132,7 @@ class EnvironmentSimulation {
     if (!animal) return { ok:false, reason:"animal-not-found" };
     if (Math.hypot(player.x-animal.x,player.y-animal.y)>88) return { ok:false, reason:"animal-too-far" };
     if (animal.tamed && animal.ownerId!==player.id) return { ok:false, reason:"animal-owned" };
+    const wasTamed=animal.tamed;
     const next=player.slots.map(slot=>slot&&({...slot}));
     const used=consumeFromSlots(next,{berries:1});
     if(!used.ok)return {ok:false,reason:"berries-required"};
@@ -139,7 +140,7 @@ class EnvironmentSimulation {
     player.inventory=slotCounts(player.slots);
     animal.hunger=100;animal.lastFedAt=Date.now();animal.affection=Math.min(100,(animal.affection||50)+12);
     if(!animal.tamed){animal.trust=Math.min(3,(animal.trust||0)+1);if(animal.trust>=3){animal.tamed=true;animal.ownerId=player.id;animal.homeX=animal.x;animal.homeY=animal.y}}
-    return {ok:true,animal:{...animal},tamed:animal.tamed,inventory:{...player.inventory},slots:player.slots};
+    return {ok:true,animal:{...animal},tamed:animal.tamed,newlyTamed:!wasTamed&&animal.tamed,inventory:{...player.inventory},slots:player.slots};
   }
   careAnimal(player, animalId) {
     const animal=this.animals.get(animalId);
@@ -149,7 +150,7 @@ class EnvironmentSimulation {
     animal.affection=Math.min(100,(animal.affection||50)+18);
     animal.hunger=Math.min(100,(animal.hunger||0)+8);
     animal.lastCaredAt=Date.now();
-    return{ok:true,animal:{...animal}};
+    return{ok:true,cared:true,animal:{...animal}};
   }
   update(dt, players = []) {
     const step=Math.max(0,Math.min(Number(dt)||0,.1)),online=new Map([...players].map(player=>[player.id,player]));
