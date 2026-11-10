@@ -2,6 +2,7 @@ const { WORLD, GAME } = require("../config");
 const { generateChunk } = require("./generateWorld");
 const { ITEMS, RECIPES } = require("./ItemCatalog");
 const { BUILDINGS, EQUIPMENT, addToSlots, slotCounts, consumeFromSlots, canOccupy } = require("./SurvivalSystems");
+const { damageEquippedTool } = require("./InventoryRules");
 
 class WorldState {
   constructor(seed = WORLD.seed) {
@@ -85,8 +86,9 @@ class WorldState {
     const added = addToSlots(player.slots, item, amount);
     if (!added.ok) return added;
     player.inventory = slotCounts(player.slots);
+    const toolWear = damageEquippedTool(player.equipment, 1);
     this.resources.delete(id);
-    return { ok: true, resourceId: id, item, amount, chunkKey: resource.chunkKey, inventory: { ...player.inventory }, slots: player.slots };
+    return { ok: true, resourceId: id, item, amount, chunkKey: resource.chunkKey, inventory: { ...player.inventory }, slots: player.slots, equipment: player.equipment, toolWear };
   }
 
   craft(player, name) {
