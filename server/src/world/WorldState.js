@@ -1,5 +1,5 @@
 const { WORLD, GAME } = require("../config");
-const { generateChunk } = require("./generateWorld");
+const { generateChunk, getBiomeAt } = require("./generateWorld");
 const { ITEMS, RECIPES } = require("./ItemCatalog");
 const { BUILDINGS, EQUIPMENT, addToSlots, slotCounts, consumeFromSlots, canOccupy } = require("./SurvivalSystems");
 const { damageEquippedTool } = require("./InventoryRules");
@@ -40,6 +40,7 @@ class WorldState {
     if (!this.chunks.has(key)) {
       const chunk = generateChunk(this.seed, cx, cy);
       if (!chunk) return null;
+      chunk.farmPlots = Array.isArray(chunk.farmPlots) ? chunk.farmPlots : [];
       this.chunks.set(key, chunk);
       for (const resource of chunk.resources) this.resources.set(resource.id, resource);
     }
@@ -47,7 +48,8 @@ class WorldState {
     return {
       ...chunk,
       resources: chunk.resources.filter(resource => this.resources.has(resource.id)),
-      buildings: [...(this.buildingsByChunk.get(key)?.values() || [])]
+      buildings: [...(this.buildingsByChunk.get(key)?.values() || [])],
+      farmPlots: [...(chunk.farmPlots || [])]
     };
   }
 
@@ -73,6 +75,31 @@ class WorldState {
 
   snapshot() {
     return { seed: this.seed, chunks: this.getNearbyChunks(WORLD.width / 2, WORLD.height / 2) };
+  }
+
+  till(player, x, y) {
+    if (!Number.isFinite(x) || !Number.isFinite(y) || x < 16 || y < 16 || x > WORLD.width - 16 || y > WORLD.height - 16) return { ok: false, reason: "invalid-position" };
+    if (Math.hypot(player.x - x, player.y - y) > GAME.interactionRange * 1.5) return { ok: false, reason: "too-far" };
+    if (player.equipment?.tool !== "wooden_hoe") return { ok: false, reason: "hoe-required" };
+    const durability = player.equipment?.durability?.wooden_hoe;
+    if (Number.isInteger(durability) && durability <= 0) return { ok: false, reason: "hoe-broken" };
+    const biome = getBiomeAt(this.seed, x, y);
+    if (biome === "lake" || biome === "mountain") return { ok: false, reason: "unsuitable-ground" };
+    const plotX = Math.round(x / 32) * 32, plotY = Math.round(y / 32) * 32;
+    if (Math.hypot(player.x - plotX, player.y - plotY) > GAME.interactionRange * 1.5) return { ok: false, reason: "too-far" };
+    const nearby = this.nearbyBuildings(plotX, plotY, 24);
+    if (nearby.some(b => b.solid !== false && Math.abs(b.x - plotX) < 24 && Math.abs(b.y - plotY) < 24)) return { ok: false, reason: "blocked-ground" };
+    const cx = Math.floor(plotX / WORLD.chunkSize), cy = Math.floor(plotY / WORLD.chunkSize);
+    const chunkKey = `${cx},${cy}`;
+    this.getChunk(cx, cy);
+    const chunk = this.chunks.get(chunkKey);
+    if (!chunk) return { ok: false, reason: "invalid-position" };
+    chunk.farmPlots = Array.isArray(chunk.farmPlots) ? chunk.farmPlots : [];
+    if (chunk.farmPlots.some(plot => Math.abs(plot.x - plotX) < 28 && Math.abs(plot.y - plotY) < 28)) return { ok: false, reason: "already-tilled" };
+    const toolWear = damageEquippedTool(player.equipment, 1);
+    const plot = { id: `plot_${cx}_${cy}_${Date.now()}_${Math.random().toString(36).slice(2,7)}`, ownerId: player.id, x: plotX, y: plotY, chunkKey, state: "tilled", createdAt: Date.now() };
+    chunk.farmPlots.push(plot);
+    return { ok: true, plot, equipment: player.equipment, toolWear };
   }
 
   gather(player, id) {
