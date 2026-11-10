@@ -33,13 +33,13 @@ class PlayerManager {
     const seed = world?.seed || WORLD.seed;
     let spawn = { x: restored?.x, y: restored?.y };
     if (!Number.isFinite(spawn.x) || !Number.isFinite(spawn.y) ||
-        !canOccupy(seed, spawn.x, spawn.y, WORLD.width, WORLD.height, [...(world?.buildings?.values() || [])])) {
+        !canOccupy(seed, spawn.x, spawn.y, WORLD.width, WORLD.height, [...(world?.buildings?.values() || [])], world?.generationVersion)) {
       spawn = null;
       const buildings = [...(world?.buildings?.values() || [])];
       for (let i = 0; i < 2000 && !spawn; i++) {
         const x = 80 + Math.random() * (WORLD.width - 160);
         const y = 80 + Math.random() * (WORLD.height - 160);
-        if (canOccupy(seed, x, y, WORLD.width, WORLD.height, buildings)) spawn = { x, y };
+        if (canOccupy(seed, x, y, WORLD.width, WORLD.height, buildings, world?.generationVersion)) spawn = { x, y };
       }
     }
     if (!spawn) spawn = { x: WORLD.width / 2, y: WORLD.height / 2 };
@@ -112,7 +112,7 @@ class PlayerManager {
       let dy = Number(player.input.down) - Number(player.input.up);
       const length = Math.hypot(dx, dy);
       if (length) { dx /= length; dy /= length; }
-      const biome = getBiomeAt(world?.seed || WORLD.seed, player.x, player.y);
+      const biome = getBiomeAt(world?.seed || WORLD.seed, player.x, player.y, world?.generationVersion);
       const factor = (BIOMES[biome]?.movement || 1) * (weather === "rain" ? 0.9 : 1);
       const maxSpeed = speed * factor;
       const hasInput = length > 0;
@@ -127,9 +127,9 @@ class PlayerManager {
       const collisionBuildings = nearby.filter(building =>
         !(building.type === "wood_door" &&
           (building.ownerId === player.id || (building.clanId && building.clanId === player.clanId))));
-      if (canOccupy(world?.seed || WORLD.seed, nextX, player.y, WORLD.width, WORLD.height, collisionBuildings)) player.x = nextX;
+      if (canOccupy(world?.seed || WORLD.seed, nextX, player.y, WORLD.width, WORLD.height, collisionBuildings, world?.generationVersion)) player.x = nextX;
       else player.vx = 0;
-      if (canOccupy(world?.seed || WORLD.seed, player.x, nextY, WORLD.width, WORLD.height, collisionBuildings)) player.y = nextY;
+      if (canOccupy(world?.seed || WORLD.seed, player.x, nextY, WORLD.width, WORLD.height, collisionBuildings, world?.generationVersion)) player.y = nextY;
       else player.vy = 0;
       player.moveSpeed = Math.hypot(player.vx, player.vy);
 
