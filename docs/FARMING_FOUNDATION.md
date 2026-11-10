@@ -23,3 +23,9 @@
 - Unit tests cover successful tilling, durability use, missing/broken hoe, unsuitable terrain, distance, duplicate plots and chunk restoration.
 - CI must pass before merge.
 - Visual acceptance still requires a browser review at native scale and on a phone; the new sprite sheet is a stronger base, not a claim that all character animation work is finished.
+
+## Follow-up farming implementation
+
+The seed-and-crop follow-up now adds wheat and carrot seed bundles, timestamp-based crop growth, a craftable watering can, server-validated planting/watering/harvest actions, crop visuals, and harvest output. Crop timestamps are persisted with their chunk, so growth is calculated after reconnect rather than relying on a per-player timer.
+
+The same follow-up adds a farmer XP track and four persistent quest counters (prepare soil, plant seeds, water crops, harvest crops), stored on the player record. This remains an incremental foundation: balancing, richer crop variety, water-source/refill gameplay, food use, and desktop/mobile multiplayer QA are still open.
