@@ -103,7 +103,7 @@ export class ProximityVoice {
     audio.playsInline = true;
     audio.dataset.playerId = id;
     document.body.append(audio);
-    const peer = { pc, audio, muted: false };
+    const peer = { pc, audio, muted: false, pendingCandidates: [] };
     this.peers.set(id, peer);
     for (const track of this.stream.getAudioTracks()) pc.addTrack(track, this.stream);
     pc.ontrack = event => {
