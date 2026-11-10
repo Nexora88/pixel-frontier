@@ -55,7 +55,8 @@ export class WorldRenderer {
     for(const[id,o]of this.farmPlotObjects)if(o.chunkKey===key){o.destroy();this.farmPlotObjects.delete(id)}
   }
   addFarmPlot(plot){
-    if(!plot?.id||this.farmPlotObjects.has(plot.id))return;
+    if(!plot?.id)return;
+    this.farmPlotObjects.get(plot.id)?.destroy();
     const g=this.scene.add.graphics().setDepth(plot.y-1);
     g.fillStyle(0x332218,0.45).fillEllipse(plot.x,plot.y+12,34,10);
     g.fillStyle(0x65452b,1).fillRect(plot.x-14,plot.y-13,28,26);
@@ -63,6 +64,19 @@ export class WorldRenderer {
     g.fillStyle(0x4c3321,1);
     for(let row=0;row<4;row++)g.fillRect(plot.x-11,plot.y-9+row*6,22,2);
     g.lineStyle(1,0x2e2118,0.9).strokeRect(plot.x-14,plot.y-13,28,26);
+    if(plot.crop){
+      const ripe=plot.stage==="ripe",growing=plot.stage==="growing";
+      const leaf=ripe?(plot.crop==="wheat"?0xd8b34f:0x75a94d):0x5c9a45;
+      g.fillStyle(0x315b31,1);
+      for(const dx of [-6,2,8]){
+        const height=ripe?13:growing?9:5;
+        g.fillRect(plot.x+dx,plot.y+5-height,height>8?2:1,height);
+        g.fillStyle(leaf,1);
+        g.fillRect(plot.x+dx-3,plot.y+5-height+2,4,2);
+        if(ripe&&plot.crop==="carrot")g.fillStyle(0xe58b3d,1).fillTriangle(plot.x+dx-3,plot.y+7,plot.x+dx+3,plot.y+7,plot.x+dx,plot.y+14);
+      }
+      if(ripe&&plot.crop==="wheat"){g.fillStyle(0xe8c86b,1);for(const dx of [-6,2,8])g.fillRect(plot.x+dx-1,plot.y-9,4,3);}
+    }
     this.farmPlotObjects.set(plot.id,g);
   }
   addResource(r){
