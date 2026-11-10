@@ -51,7 +51,7 @@ test("tilling rejects unsuitable terrain, distant positions and duplicate plots"
   let lake = null;
   for (let x = 16; x < 3200 && !lake; x += 32) {
     for (let y = 16; y < 2400; y += 32) {
-      if (getBiomeAt(world.seed, x, y) === "lake") { lake = { x, y }; break; }
+      if (["lake","ocean"].includes(getBiomeAt(world.seed, x, y))) { lake = { x, y }; break; }
     }
   }
   assert.ok(lake);
