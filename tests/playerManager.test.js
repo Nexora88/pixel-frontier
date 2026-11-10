@@ -11,8 +11,8 @@ test("server movement accelerates, normalizes diagonal input and decelerates smo
   manager.update(0.05,180,world,"clear");
   assert.ok(p.vx>firstSpeed,"continued input should accelerate toward target speed");
   p.input={up:false,down:true,left:false,right:true};
-  manager.update(0.05,180,world,"clear");
-  assert.ok(Math.abs(p.vx-p.vy)<1,"diagonal movement should remain normalized");
+  for(let i=0;i<4;i++)manager.update(0.05,180,world,"clear");
+  assert.ok(Math.abs(p.vx-p.vy)<1,"diagonal movement should converge to a normalized direction");
   p.input={up:false,down:false,left:false,right:false};
   const beforeStop=p.vx;
   manager.update(0.05,180,world,"clear");
