@@ -66,3 +66,5 @@ html,body{font-family:Georgia,"Trebuchet MS",serif;background:#211b14}
 #voice-peers li span{flex:1;min-width:70px}
 #voice-peers li button{font-size:9px;padding:4px 6px}
 @media(max-width:700px){.voice-chat{right:7px;bottom:7px;width:min(47vw,220px);padding:8px}.voice-chat strong{font-size:11px}.voice-note{font-size:8px}.voice-chat button{font-size:8px;padding:6px}.voice-chat #voice-ptt{min-height:38px}}
+
+.farming-progress{display:grid;grid-template-columns:1fr auto;gap:6px 12px;margin-top:12px;padding-top:10px;border-top:1px solid #8d765533;color:#d8c7a8;font-size:11px}.farming-progress ol{grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr;gap:4px 14px;margin:2px 0 0;padding-left:18px}.farming-progress li{color:#b9aa8f}.farm-actions{margin-top:6px}
