@@ -30,7 +30,7 @@ test("planting consumes one seed and crop growth is timestamp based", () => {
   const planted = world.plant(player, plot.id, "wheat_seed");
   assert.equal(planted.ok, true);
   assert.equal(player.inventory.wheat_seed, 1);
-  assert.equal(player.farmingXp, 8);
+  assert.equal(player.farmingXp, 13); // 5 XP for tilling + 8 XP for planting
   assert.equal(player.farmingQuests.plant_seeds.progress, 1);
   assert.equal(world.cropStage(planted.plot, planted.plot.plantedAt + 600000), "ripe");
   assert.equal(world.cropStage(planted.plot, planted.plot.plantedAt + 1000), "seedling");
@@ -45,7 +45,7 @@ test("watering requires a watering can and accelerates offline growth", () => {
   player.equipment.tool = "wooden_watering_can";
   const watered = world.water(player, plot.id);
   assert.equal(watered.ok, true);
-  assert.equal(player.farmingXp, 12);
+  assert.equal(player.farmingXp, 17); // tilling + planting + watering
   assert.equal(player.farmingQuests.water_crops.progress, 1);
   assert.equal(world.water(player, plot.id).reason, "already-watered");
   assert.equal(world.cropStage(watered.plot, watered.plot.plantedAt + 300000), "ripe");
