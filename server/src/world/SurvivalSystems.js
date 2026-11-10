@@ -6,6 +6,7 @@ const EQUIPMENT = Object.freeze({
   wooden_axe: { label: "Wooden Axe", category: "equipment", gatherPower: 2, damage: 12, costs: { wood: 15 } },
   wooden_pickaxe: { label: "Wooden Pickaxe", category: "equipment", gatherPower: 2, damage: 8, costs: { wood: 15 } },
   wooden_hoe: { label: "Wooden Hoe", category: "equipment", gatherPower: 1, damage: 1, costs: { wood: 12, fiber: 4 } },
+  wooden_watering_can: { label: "Wooden Watering Can", category: "equipment", gatherPower: 1, damage: 1, costs: { wood: 6, fiber: 4 } },
   iron_sword: { label: "Iron Sword", category: "equipment", gatherPower: 1, damage: 25, costs: { wood: 30, stone: 20, iron: 5 }, progression: "future" },
   advanced_pickaxe: { label: "Advanced Pickaxe", category: "equipment", gatherPower: 4, damage: 10, costs: { wood: 30, stone: 20, iron: 5 }, progression: "future" }
 });
