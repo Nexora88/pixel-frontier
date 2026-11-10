@@ -21,3 +21,8 @@
 - This milestone does not yet include deep-water swimming, boat damage, cargo storage, wind/current simulation, ports or multiple boat classes.
 - Water and shoreline sprite animation, wake effects, paddling frames and the final detailed boat art belong to the later animation/art milestone.
 - Desktop/mobile browser QA and multi-player sea-travel load testing are still required.
+
+
+## CI follow-up
+- Regression tests include the open-ocean biome in existing farming terrain checks.
+- PostgreSQL persistence coverage asserts that an active raft is restored after reconnect.
