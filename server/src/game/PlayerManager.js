@@ -33,7 +33,7 @@ class PlayerManager {
     const seed = world?.seed || WORLD.seed;
     let spawn = { x: restored?.x, y: restored?.y };
     if (!Number.isFinite(spawn.x) || !Number.isFinite(spawn.y) ||
-        !(restored?.boat_state?.active && getBiomeAt(seed, spawn.x, spawn.y, world?.generationVersion) === "ocean") && !canOccupy(seed, spawn.x, spawn.y, WORLD.width, WORLD.height, [...(world?.buildings?.values() || [])], world?.generationVersion)) {
+        !(restored?.boat_state?.active && spawn.x >= 16 && spawn.y >= 16 && spawn.x <= WORLD.width - 16 && spawn.y <= WORLD.height - 16 && getBiomeAt(seed, spawn.x, spawn.y, world?.generationVersion) === "ocean") && !canOccupy(seed, spawn.x, spawn.y, WORLD.width, WORLD.height, [...(world?.buildings?.values() || [])], world?.generationVersion)) {
       spawn = null;
       const buildings = [...(world?.buildings?.values() || [])];
       for (let i = 0; i < 2000 && !spawn; i++) {
