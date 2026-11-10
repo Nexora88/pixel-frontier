@@ -25,12 +25,33 @@ export class WorldScene extends Phaser.Scene {
   updateEnvironment(d){if(!this.environmentLabel||!d)return;this.events.emit("environment",d);const weatherNames={clear:"AÇIK",cloudy:"BULUTLU",rain:"YAĞMUR"};this.environmentLabel.setText(`GÜN ${d.day} · ${String(d.hour).padStart(2,"0")}:00 · ${weatherNames[d.weather]||d.weather.toUpperCase()}`);this.environmentLabel.setColor(d.isNight?"#b9c8ff":"#fff1c2");this.lightingOverlay.setFillStyle(0x10152b,d.isNight ? 0.32 : 0)}
   updateAnimals(items){const visible=new Set(items.map(a=>a.id));for(const[id,o]of this.animals)if(!visible.has(id)){o.destroy();this.animals.delete(id)}for(const a of items){if(!this.animals.has(a.id)){const color=a.species==="duck"?0x8fc6d4:a.species==="rabbit"?0xd6c6a8:0x9eaa8b;this.animals.set(a.id,this.add.circle(a.x,a.y,5,color).setStrokeStyle(1,0x26332a).setDepth(a.y))}this.animals.get(a.id).setPosition(a.x,a.y).setDepth(a.y)}}
   upsert(d){
-    let p=this.players.get(d.id);if(!p){const body=this.add.sprite(d.x,d.y,"survivor",0).setOrigin(.5,.78).setDepth(d.y),label=this.add.text(d.x,d.y-23,"",{fontFamily:"monospace",fontSize:"9px",color:"#f5e4c2",backgroundColor:"#302317",padding:{x:3,y:2}}).setOrigin(.5).setDepth(d.y+1),tool=this.add.sprite(d.x+8,d.y+1,"items",12).setScale(1.1).setDepth(d.y+2);p={body,label,tool,x:d.x,y:d.y,direction:"down"};this.players.set(d.id,p)}
-    const dx=d.x-p.x,dy=d.y-p.y,moving=Math.abs(dx)+Math.abs(dy)>.25;if(moving){if(Math.abs(dx)>Math.abs(dy))p.direction=dx<0?"left":"right";else p.direction=dy<0?"up":"down";const a=`survivor-walk-${p.direction}`;if(p.body.anims.currentAnim?.key!==a)p.body.play(a,true)}else{p.body.anims.stop();p.body.setFrame(({down:0,left:4,right:8,up:12})[p.direction])}
-    p.body.setPosition(d.x,d.y).setDepth(d.y);p.label.setPosition(d.x,d.y-23).setDepth(d.y+1).setText(d.id===this.localId?"SEN":(d.name||"GEZGİN"));
+    let p=this.players.get(d.id);
+    if(!p){
+      const body=this.add.sprite(d.x,d.y,"survivor",0).setOrigin(.5,.78).setDepth(d.y);
+      const label=this.add.text(d.x,d.y-23,"",{fontFamily:"monospace",fontSize:"9px",color:"#f5e4c2",backgroundColor:"#302317",padding:{x:3,y:2}}).setOrigin(.5).setDepth(d.y+1);
+      const tool=this.add.sprite(d.x+8,d.y+1,"items",12).setScale(1.1).setDepth(d.y+2);
+      p={body,label,tool,x:d.x,y:d.y,targetX:d.x,targetY:d.y,direction:"down",moveSpeed:0};this.players.set(d.id,p);
+    }
+    const dx=d.x-(p.lastNetX??d.x),dy=d.y-(p.lastNetY??d.y);
+    const vx=Number.isFinite(d.vx)?d.vx:dx*10,vy=Number.isFinite(d.vy)?d.vy:dy*10;
+    const moving=Math.hypot(vx,vy)>10||Math.abs(dx)+Math.abs(dy)>.25;
+    if(moving){
+      if(Math.abs(vx)>Math.abs(vy))p.direction=vx<0?"left":"right";else p.direction=vy<0?"up":"down";
+      const key=`survivor-walk-${p.direction}`;
+      if(p.body.anims.currentAnim?.key!==key)p.body.play(key,true);
+      p.body.anims.timeScale=Math.max(.75,Math.min(1.35,Math.hypot(vx,vy)/180));
+    }else{
+      p.body.anims.stop();
+      p.body.setFrame(({down:0,left:4,right:8,up:12})[p.direction]);
+    }
+    p.targetX=d.x;p.targetY=d.y;p.moveSpeed=Math.hypot(vx,vy);p.lastNetX=d.x;p.lastNetY=d.y;
+    if(d.id===this.localId)p.body.setPosition(d.x,d.y);
+    p.body.setDepth(p.body.y);p.label.setPosition(p.body.x,p.body.y-23).setDepth(p.body.y+1).setText(d.id===this.localId?"SEN":(d.name||"GEZGİN"));
     const ally=!!this.localClanId&&d.clanId===this.localClanId,enemy=!!this.localClanId&&!!d.clanId&&d.clanId!==this.localClanId;p.label.setColor(ally?"#8dff9b":enemy?"#ff6666":"#ffffff");
-    const frames={primitive_stone:12,wooden_axe:13,wooden_pickaxe:14,wooden_hoe:16,advanced_pickaxe:14,iron_sword:13};if(d.equipment?.tool&&p.tool)p.tool.setFrame(frames[d.equipment.tool]??12).setPosition(d.x+12,d.y+4).setDepth(d.y+2).setVisible(true);else if(p.tool)p.tool.setVisible(false);
-    p.x=d.x;p.y=d.y;if(d.id===this.localId){const sig=JSON.stringify([d.inventory,d.slots,d.equipment]);if(sig!==p.inventorySignature){p.inventorySignature=sig;this.events.emit("inventory",{inventory:d.inventory,slots:d.slots,equipment:d.equipment})}}
+    const frames={primitive_stone:12,wooden_axe:13,wooden_pickaxe:14,wooden_hoe:16,advanced_pickaxe:14,iron_sword:13};
+    if(d.equipment?.tool&&p.tool)p.tool.setFrame(frames[d.equipment.tool]??12).setPosition(p.body.x+12,p.body.y+4).setDepth(p.body.y+2).setVisible(true);else if(p.tool)p.tool.setVisible(false);
+    p.x=d.x;p.y=d.y;
+    if(d.id===this.localId){const sig=JSON.stringify([d.inventory,d.slots,d.equipment]);if(sig!==p.inventorySignature){p.inventorySignature=sig;this.events.emit("inventory",{inventory:d.inventory,slots:d.slots,equipment:d.equipment})}}
   }
   remove(id){const p=this.players.get(id);if(!p)return;p.body.destroy();p.label.destroy();p.tool?.destroy();this.players.delete(id)}
   emitGatherParticles(item){const me=this.players.get(this.localId);if(!me)return;const color=item==="wood"?0x9b6a3c:item==="stone"?0x9da5ad:0x83c66b;for(let i=0;i<5;i++){const particle=this.add.rectangle(me.body.x,me.body.y-8,3,3,color).setDepth(me.body.depth+3);this.particles.add(particle);this.tweens.add({targets:particle,x:particle.x+Phaser.Math.Between(-15,15),y:particle.y+Phaser.Math.Between(-14,5),alpha:0,duration:200,onComplete:()=>{particle.destroy();this.particles.delete(particle)}})}}
@@ -39,6 +60,6 @@ export class WorldScene extends Phaser.Scene {
   openNearestChest(){const me=this.players.get(this.localId);if(!me)return;let target=null,best=90;for(const[id,o]of this.renderer.buildingObjects){if(o.type!=="chest")continue;const d=Phaser.Math.Distance.Between(me.body.x,me.body.y,o.shape.x,o.shape.y);if(d<best){best=d;target=id}}if(target)this.net.emit("chest:open",{chestId:target});else this.events.emit("action-result",{ok:false,reason:"no-chest-nearby"})}
   setBuildMode(type){this.tillMode=false;this.buildMode=this.buildMode===type?null:type}
   setTillMode(){this.buildMode=null;this.farmActionMode=null;this.tillMode=!this.tillMode;return this.tillMode}\n  setFarmActionMode(mode,seedItem="wheat_seed"){this.buildMode=null;this.tillMode=false;const same=this.farmActionMode===mode&&(mode!=="plant"||this.farmSeedItem===seedItem);this.farmActionMode=same?null:mode;this.farmSeedItem=seedItem;return this.farmActionMode}
-  update(time){if(!this.net.connected)return;if(Date.now()-(this.lastCropRefresh||0)>1000){this.lastCropRefresh=Date.now();for(const plot of this.farmPlots.values())if(plot.crop){const duration=Math.max(60000,(plot.growthDurationMs||600000)-(plot.growthBonusMs||0)),progress=Math.max(0,Date.now()-plot.plantedAt)/duration,stage=progress>=1?"ripe":progress>=.66?"growing":"seedling";if(stage!==plot.stage){plot.stage=stage;this.renderer.addFarmPlot(plot)}}}const k=this.wasd,c=this.cursors,i={up:k.W.isDown||c.up.isDown,down:k.S.isDown||c.down.isDown,left:k.A.isDown||c.left.isDown,right:k.D.isDown||c.right.isDown},sig=JSON.stringify(i);if(sig!==this.lastInput){this.net.emit("player:input",i);this.lastInput=sig}if(time-this.lastCanopyUpdate>120){const me=this.players.get(this.localId);if(me)this.renderer.updateCanopies(me.body.x,me.body.y,time);this.lastCanopyUpdate=time}}
+  update(time,delta=16){if(!this.net.connected)return;const blend=1-Math.exp(-Math.min(delta,50)/65);for(const[id,p]of this.players){if(id!==this.localId){p.body.x+= (p.targetX-p.body.x)*blend;p.body.y+=(p.targetY-p.body.y)*blend;p.body.setDepth(p.body.y);p.label.setPosition(p.body.x,p.body.y-23).setDepth(p.body.y+1);if(p.tool?.visible)p.tool.setPosition(p.body.x+12,p.body.y+4).setDepth(p.body.y+2)}}if(Date.now()-(this.lastCropRefresh||0)>1000){this.lastCropRefresh=Date.now();for(const plot of this.farmPlots.values())if(plot.crop){const duration=Math.max(60000,(plot.growthDurationMs||600000)-(plot.growthBonusMs||0)),progress=Math.max(0,Date.now()-plot.plantedAt)/duration,stage=progress>=1?"ripe":progress>=.66?"growing":"seedling";if(stage!==plot.stage){plot.stage=stage;this.renderer.addFarmPlot(plot)}}}const k=this.wasd,c=this.cursors,i={up:k.W.isDown||c.up.isDown,down:k.S.isDown||c.down.isDown,left:k.A.isDown||c.left.isDown,right:k.D.isDown||c.right.isDown},sig=JSON.stringify(i);if(sig!==this.lastInput){this.net.emit("player:input",i);this.lastInput=sig}if(time-this.lastCanopyUpdate>120){const me=this.players.get(this.localId);if(me)this.renderer.updateCanopies(me.body.x,me.body.y,time);this.lastCanopyUpdate=time}}
   cleanup(){if(this.cleaned)return;this.cleaned=true;this.scale.off("resize",this.onResize);for(const p of this.particles)p.destroy();this.particles.clear();this.players.clear();this.animals.clear();for(const unsubscribe of this.netUnsubs)unsubscribe?.();this.netUnsubs.length=0;this.renderer?.destroy()}
 }
