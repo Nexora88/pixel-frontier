@@ -2,6 +2,7 @@ const TOOL_DURABILITY = Object.freeze({
   primitive_stone: 40,
   wooden_axe: 80,
   wooden_pickaxe: 80,
+  wooden_hoe: 60,
   advanced_pickaxe: 160,
   iron_sword: 120
 });
