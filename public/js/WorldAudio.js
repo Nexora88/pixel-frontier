@@ -20,6 +20,8 @@ export class WorldAudio {
     this.started = false;
     this.weather = "clear";
     this.music = document.querySelector("#world-music");
+    this.musicTracks = { exploration: "/assets/audio/frontier-mystery.mp3", night: "/assets/audio/whispers-beneath-pines.mp3", settlement: "/assets/audio/hearth-of-the-new-home.mp3" };
+    this.currentMusicScene = null;
     this.unlock = () => this.start();
     document.addEventListener("pointerdown", this.unlock, { once: true });
     document.addEventListener("keydown", this.unlock, { once: true });
@@ -137,6 +139,15 @@ export class WorldAudio {
       this.windLayer.level.gain.setTargetAtTime(windy, this.context.currentTime, 0.8);
       this.waterLayer.level.gain.setTargetAtTime(this.weather === "rain" ? 0.075 : 0.035, this.context.currentTime, 0.8);
     }
+  }
+
+  setMusicScene(scene) {
+    const track = this.musicTracks[scene];
+    if (!this.music || !track || this.currentMusicScene === scene) return;
+    this.currentMusicScene = scene;
+    this.music.src = track;
+    this.music.load();
+    this.playMusic();
   }
 
   playMusic() {
