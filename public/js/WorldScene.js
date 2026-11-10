@@ -1,7 +1,7 @@
 import { WorldRenderer } from "./WorldRenderer.js";
 export class WorldScene extends Phaser.Scene {
   constructor(net){super("WorldScene");this.net=net;this.players=new Map();this.localId=null;this.localClanId=null;this.lastInput="";this.buildMode=null;this.animals=new Map();this.particles=new Set();this.netUnsubs=[];this.lastSpawnProtection=null;this.lastCanopyUpdate=0;this.territoryToast=null;this.tillMode=false}
-  preload(){this.load.spritesheet("survivor","/assets/survivor.svg",{frameWidth:16,frameHeight:16});this.load.spritesheet("items","/assets/items.svg",{frameWidth:16,frameHeight:16})}
+  preload(){this.load.spritesheet("survivor","/assets/survivor-32.svg",{frameWidth:32,frameHeight:32});this.load.spritesheet("items","/assets/items.svg",{frameWidth:16,frameHeight:16})}
   create(){
     this.createPlayerAnimations();this.renderer=new WorldRenderer(this);this.cursors=this.input.keyboard.createCursorKeys();this.wasd=this.input.keyboard.addKeys("W,A,S,D");
     this.input.keyboard.on("keydown-E",()=>this.gatherNearest());this.input.keyboard.on("keydown-F",()=>this.openNearestChest());
