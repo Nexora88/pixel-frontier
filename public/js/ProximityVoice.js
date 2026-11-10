@@ -132,13 +132,15 @@ export class ProximityVoice {
       if (!peer) return;
       if (signal.type === "offer") {
         await peer.pc.setRemoteDescription(signal.sdp);
+        for (const candidate of peer.pendingCandidates.splice(0)) await peer.pc.addIceCandidate(candidate);
         const answer = await peer.pc.createAnswer();
         await peer.pc.setLocalDescription(answer);
         this.net.emit("voice:signal", { to: from, signal: { type: "answer", sdp: peer.pc.localDescription } });
       } else if (signal.type === "answer" && !peer.pc.remoteDescription) {
         await peer.pc.setRemoteDescription(signal.sdp);
       } else if (signal.type === "candidate" && signal.candidate) {
-        await peer.pc.addIceCandidate(signal.candidate);
+        if (peer.pc.remoteDescription) await peer.pc.addIceCandidate(signal.candidate);
+        else peer.pendingCandidates.push(signal.candidate);
       }
     } catch {
       this.closePeer(from);
