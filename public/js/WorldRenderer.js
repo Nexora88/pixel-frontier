@@ -1,6 +1,6 @@
 export class WorldRenderer {
   constructor(scene) {
-    this.scene=scene;this.resourceObjects=new Map();this.buildingObjects=new Map();this.chunkObjects=new Map();this.farmPlotObjects=new Map();
+    this.scene=scene;this.resourceObjects=new Map();this.buildingObjects=new Map();this.chunkObjects=new Map();this.farmPlotObjects=new Map();this.waterObjects=new Map();
     this.territoryGraphics=scene.add.graphics().setDepth(-4);
   }
   drawGround(width,height,seed){this.worldWidth=width;this.worldHeight=height;this.seed=seed}
@@ -51,10 +51,24 @@ export class WorldRenderer {
       fontFamily:"Georgia,serif",fontSize:"9px",color:"#ead8b4",backgroundColor:"#21180f99",padding:{x:4,y:3}
     }).setDepth(-8);
     this.chunkObjects.set(chunk.key,{ground:graphics,label});
+    const water= this.scene.add.graphics().setDepth(-9);
+    let waterCount=0;
+    if(Array.isArray(chunk.terrainCells)){
+      for(const cell of chunk.terrainCells)if(cell.biome==="ocean"||cell.biome==="lake"){
+        const h=this.hash(`${this.seed}:${chunk.key}:water:${cell.x}:${cell.y}`);
+        if(h%3!==0)continue;
+        const px=cell.x+4+(h%13),py=cell.y+8+((h>>>5)%11);
+        water.fillStyle(cell.biome==="ocean"?0x9bc9d0:0x83b9b8,.55).fillRect(px,py,5+(h%5),1);
+        waterCount++;
+      }
+    }else if(chunk.biome==="lake"){
+      for(let n=0;n<18;n++){const h=this.hash(`${chunk.key}:legacy-water:${n}`);water.fillStyle(0x83b9b8,.5).fillRect(chunk.x+8+h%370,chunk.y+8+((h>>>8)%370),5+(h%5),1);waterCount++}
+    }
+    if(waterCount)this.waterObjects.set(chunk.key,{graphics:water,phase:(this.hash(chunk.key+":water-phase")%628)/100});else water.destroy();
     chunk.resources.forEach(r=>this.addResource(r));chunk.buildings.forEach(b=>this.addBuilding(b));(chunk.farmPlots||[]).forEach(plot=>this.addFarmPlot(plot));
   }
   removeChunk(key){
-    const chunk=this.chunkObjects.get(key);if(chunk){chunk.ground.destroy();chunk.label.destroy();this.chunkObjects.delete(key)}
+    const chunk=this.chunkObjects.get(key);if(chunk){chunk.ground.destroy();chunk.label.destroy();this.chunkObjects.delete(key)}const water=this.waterObjects.get(key);if(water){water.graphics.destroy();this.waterObjects.delete(key)}
     for(const[id,o]of this.resourceObjects)if(o.chunkKey===key)this.removeResource(id);
     for(const[id,o]of this.buildingObjects)if(o.chunkKey===key){o.shape.destroy();o.shadow?.destroy();o.glow?.destroy();this.buildingObjects.delete(id)}
     for(const[id,o]of this.farmPlotObjects)if(o.chunkKey===key){o.destroy();this.farmPlotObjects.delete(id)}
@@ -93,6 +107,7 @@ export class WorldRenderer {
     this.resourceObjects.set(r.id,{shape,shadow,canopy,chunkKey:r.chunkKey,type:r.type,x:r.x,y:r.y,phase:this.hash(r.id)%628/100});
   }
   removeResource(id){const o=this.resourceObjects.get(id);if(!o)return;o.shape.destroy();o.shadow.destroy();o.canopy?.destroy();this.resourceObjects.delete(id)}
+  updateWater(time=0){for(const water of this.waterObjects.values())water.graphics.setAlpha(.42+.32*Math.sin(time/420+water.phase))}
   updateCanopies(x,y,time=0){for(const o of this.resourceObjects.values())if(o.canopy){const under=Math.abs(x-o.x)<18&&y>o.y-20&&y<o.y+18;o.canopy.setAlpha(under?.2:.7);const nearby=Math.hypot(x-o.x,y-o.y)<260;if(nearby)o.canopy.setAngle(Math.sin(time/950+(o.phase||0))*1.7)}}
   setTerritories(items=[]){
     const g=this.territoryGraphics;g.clear();
@@ -143,5 +158,5 @@ export class WorldRenderer {
   }
   addBuildings(items){items.forEach(b=>this.addBuilding(b))}
   hash(value){let h=2166136261;for(const c of String(value)){h^=c.charCodeAt(0);h=Math.imul(h,16777619)}return h>>>0}
-  destroy(){for(const chunk of this.chunkObjects.values()){chunk.ground.destroy();chunk.label.destroy()}for(const o of this.resourceObjects.values()){o.shape.destroy();o.shadow.destroy();o.canopy?.destroy()}for(const o of this.buildingObjects.values()){o.shape.destroy();o.shadow.destroy();o.glow?.destroy()}for(const o of this.farmPlotObjects.values())o.destroy();this.farmPlotObjects.clear();this.chunkObjects.clear();this.resourceObjects.clear();this.buildingObjects.clear();this.territoryGraphics.destroy()}
+  destroy(){for(const chunk of this.chunkObjects.values()){chunk.ground.destroy();chunk.label.destroy()}for(const o of this.resourceObjects.values()){o.shape.destroy();o.shadow.destroy();o.canopy?.destroy()}for(const o of this.buildingObjects.values()){o.shape.destroy();o.shadow.destroy();o.glow?.destroy()}for(const o of this.farmPlotObjects.values())o.destroy();this.farmPlotObjects.clear();for(const water of this.waterObjects.values())water.graphics.destroy();this.waterObjects.clear();this.chunkObjects.clear();this.resourceObjects.clear();this.buildingObjects.clear();this.territoryGraphics.destroy()}
 }
