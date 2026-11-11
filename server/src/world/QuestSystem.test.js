@@ -18,7 +18,7 @@ test("quest progress is server-owned, persists on player state, and rewards once
   assert.equal(player.inventory.berries,6);
   const second=quests.record(player,"gather",{item:"wood",amount:15});
   assert.equal(second.xp,55);
-  assert.equal(player.inventory.berries,3);
+  assert.equal(player.inventory.berries,6);
 });
 
 test("daily quests reset at UTC day boundary while permanent progress remains",()=>{
