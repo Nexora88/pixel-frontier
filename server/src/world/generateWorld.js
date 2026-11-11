@@ -21,6 +21,10 @@ function insideIsland(seed,x,y,island){
  return distance<=edge;
 }
 function isLandAt(seed,x,y){return ISLANDS.some(island=>insideIsland(seed,x,y,island));}
+function getIslandIdAt(seed,x,y,version=WORLD.generationVersion||1){
+ if(version<2||x<0||y<0||x>=WORLD.width||y>=WORLD.height)return null;
+ return ISLANDS.find(island=>insideIsland(seed,x,y,island))?.name||null;
+}
 function getBiomeAt(seed,x,y,version=WORLD.generationVersion||1){
  if(version<2)return legacyBiomeAt(seed,x,y);
  if(x<0||y<0||x>=WORLD.width||y>=WORLD.height||!isLandAt(seed,x,y))return "ocean";
@@ -53,4 +57,4 @@ function generateChunk(seed=WORLD.seed,cx=0,cy=0,version=WORLD.generationVersion
  return{key:`${cx},${cy}`,x,y,width:Math.min(size,WORLD.width-x),height:Math.min(size,WORLD.height-y),chunkX:cx,chunkY:cy,biome:centerBiome,movement:(BIOMES[centerBiome]||BIOMES.ocean).movement,tint:(BIOMES[centerBiome]||BIOMES.ocean).tint,terrainCells,resources};
 }
 function generateResources(seed=WORLD.seed,version=WORLD.generationVersion||1){const out=[];for(let y=0;y<Math.ceil(WORLD.height/WORLD.chunkSize);y++)for(let x=0;x<Math.ceil(WORLD.width/WORLD.chunkSize);x++)out.push(...generateChunk(seed,x,y,version).resources);return out}
-module.exports={BIOMES,ISLANDS,createRandom,isLandAt,getBiomeAt,generateChunk,generateResources};
+module.exports={BIOMES,ISLANDS,createRandom,isLandAt,getIslandIdAt,getBiomeAt,generateChunk,generateResources};

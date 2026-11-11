@@ -12,6 +12,8 @@ Oyuncular bilinmeyen bir dünyaya yolcu olarak gelir; kaynak toplar, zanaat yapa
 - İsteğe bağlı PostgreSQL kalıcılığı.
 - Chunk tabanlı oyuncu görünürlüğü ve süreç içi 50 kişilik mantıksal lobi.
 - Kabile totemleri, 400×400 toprak sınırları ve hâkimiyet özeti.
+- Sunucu otoriteli kalıcı görevler, günlük/haftalık ödüller ve güvenli oyuncu takası.
+- Çevrimiçi savunucu gerektiren, yıkımsız yerleşim kontrol mücadeleleri.
 - Oyuncu sayısı yalnızca canlı insan oturumlarını gösterir; bot oyuncu yoktur.
 
 ## Yerel çalıştırma
@@ -35,7 +37,7 @@ Tarayıcıda http://localhost:3000 adresini aç. İki ayrı oyuncuyu test etmek 
 - Tahta balta veya taş kazma üret; çalışma tezgâhını yerleştir
 
 ## İlk hedef
-15 odun ve 5 taş topla → tahta balta üret → çalışma tezgâhı kur → erzak sandığı yerleştir. Kabileye katılmak isteğe bağlıdır. Bu rehber henüz istemci tarafında tutulur; kalıcı sunucu görev sistemi yol haritasındadır.
+15 odun ve 5 taş topla → tahta balta üret → çalışma tezgâhı kur → erzak sandığı yerleştir. Kabileye katılmak isteğe bağlıdır. Başlangıç rehberine ek olarak günlük/haftalık görevler sunucuda saklanır; ada keşfi, hayvan bakımı, takas ve yerleşim mücadeleleri görev ilerlemesine katkı sağlar.
 
 ## Güvenlik ve ölçek
 Üretimde ALLOWED_ORIGINS değerini tam HTTPS origin listesiyle yapılandır. Mevcut lobi tahsisi süreç içidir; çoklu sunucu dünya parçalama sistemi değildir. Ayrıntılar için `docs/SCALING_ARCHITECTURE.md` ve `docs/PRODUCTION_SECURITY.md` dosyalarına bak.
