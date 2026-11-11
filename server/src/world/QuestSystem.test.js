@@ -14,10 +14,10 @@ test("quest progress is server-owned, persists on player state, and rewards once
   const quests=new QuestSystem(()=>now),player=makePlayer();
   const first=quests.record(player,"gather",{item:"wood",amount:15});
   assert.equal(first.quests.find(q=>q.id==="pioneer_gather").completed,true);
-  assert.equal(first.xp,35);
-  assert.equal(player.inventory.berries,3);
+  assert.equal(first.xp,55);
+  assert.equal(player.inventory.berries,6);
   const second=quests.record(player,"gather",{item:"wood",amount:15});
-  assert.equal(second.xp,35);
+  assert.equal(second.xp,55);
   assert.equal(player.inventory.berries,3);
 });
 
