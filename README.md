@@ -14,6 +14,7 @@ Oyuncular bilinmeyen bir dünyaya yolcu olarak gelir; kaynak toplar, zanaat yapa
 - Kabile totemleri, 400×400 toprak sınırları ve hâkimiyet özeti.
 - Sunucu otoriteli kalıcı görevler, günlük/haftalık ödüller ve güvenli oyuncu takası.
 - Çevrimiçi savunucu gerektiren, yıkımsız yerleşim kontrol mücadeleleri.
+- Dört yönlü karakter yürüme animasyonları ve animasyonlu geyik, tavşan, ördek sprite atlasları.
 - Oyuncu sayısı yalnızca canlı insan oturumlarını gösterir; bot oyuncu yoktur.
 
 ## Yerel çalıştırma
