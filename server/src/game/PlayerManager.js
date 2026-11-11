@@ -54,6 +54,7 @@ class PlayerManager {
       boat: restored?.boat_state && typeof restored.boat_state === "object" && restored.boat_state.active ? restored.boat_state : null,
       farmingXp: Number.isInteger(restored?.farming_xp) ? Math.max(0, restored.farming_xp) : 0,
       farmingQuests: restored?.farming_quests && typeof restored.farming_quests === "object" ? restored.farming_quests : {},
+      questState: restored?.quest_state && typeof restored.quest_state === "object" ? restored.quest_state : {},
       lastInputAt: 0, subscribedChunks: new Set(), clanId: restored?.clan_id || null,
       spawnProtectionUntil: restored ? 0 : Date.now() + 15000
     };
