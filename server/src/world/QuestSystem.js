@@ -9,7 +9,11 @@ const DEFINITIONS = Object.freeze([
   { id:"daily_crafter", title:"Günlük Zanaat", description:"2 eşya üret", cadence:"daily", action:"craft", goal:2, reward:{xp:25,item:"fiber",quantity:3} },
   { id:"daily_harvest", title:"Günlük Hasat", description:"3 ürün hasat et", cadence:"daily", action:"harvest", goal:3, reward:{xp:25,item:"carrot_seed",quantity:2} },
   { id:"daily_trade", title:"Pazar Günü", description:"Bir oyuncuyla takas tamamla", cadence:"daily", action:"trade", goal:1, reward:{xp:30,item:"berries",quantity:4} },
-  { id:"weekly_explorer", title:"Diyarın İzinde", description:"Bir hafta içinde 3 farklı biyom keşfet", cadence:"weekly", action:"explore", goal:3, unique:true, reward:{xp:80,item:"crystal",quantity:1} }
+  { id:"weekly_explorer", title:"Diyarın İzinde", description:"Bir hafta içinde 3 farklı biyom keşfet", cadence:"weekly", action:"explore", goal:3, unique:true, reward:{xp:80,item:"crystal",quantity:1} },
+  { id:"weekly_islander", title:"Adalar Arası", description:"Bir hafta içinde 2 farklı adaya ulaş", cadence:"weekly", action:"island", goal:2, uniqueKey:"island", reward:{xp:90,item:"wood",quantity:12} },
+  { id:"daily_caretaker", title:"Yoldaşına İyi Bak", description:"Hayvanlarınla iki kez ilgilen", cadence:"daily", action:"care", goal:2, reward:{xp:25,item:"berries",quantity:3} },
+  { id:"weekly_merchant", title:"Pazar Ustası", description:"Bir hafta içinde 3 takas tamamla", cadence:"weekly", action:"trade", goal:3, reward:{xp:65,item:"stone",quantity:8} },
+  { id:"weekly_settlement", title:"Sınırın Koruyucusu", description:"Bir yerleşim mücadelesine katıl", cadence:"weekly", action:"settlement", goal:1, reward:{xp:75,item:"wood",quantity:10} }
 ]);
 
 function utcDay(now) { return new Date(now).toISOString().slice(0,10); }
@@ -28,8 +32,8 @@ class QuestSystem {
   ensure(player) {
     const now = this.clock(), day = utcDay(now), week = utcWeek(now);
     let state = player.questState;
-    if (!state || typeof state !== "object" || Array.isArray(state)) state = { xp:0, progress:{}, completed:{}, pendingRewards:[], visitedBiomes:[] };
-    state.progress ||= {}; state.completed ||= {}; state.pendingRewards ||= []; state.visitedBiomes ||= [];
+    if (!state || typeof state !== "object" || Array.isArray(state)) state = { xp:0, progress:{}, completed:{}, pendingRewards:[], visitedBiomes:[], visitedIslands:[] };
+    state.progress ||= {}; state.completed ||= {}; state.pendingRewards ||= []; state.visitedBiomes ||= []; state.visitedIslands ||= [];
     state.xp = Math.max(0, Number(state.xp)||0);
     if (state.dailyKey !== day) {
       for (const q of DEFINITIONS.filter(item=>item.cadence==="daily")) { delete state.progress[q.id]; delete state.completed[q.id]; }
@@ -37,7 +41,7 @@ class QuestSystem {
     }
     if (state.weeklyKey !== week) {
       for (const q of DEFINITIONS.filter(item=>item.cadence==="weekly")) { delete state.progress[q.id]; delete state.completed[q.id]; }
-      state.visitedBiomes = [];
+      state.visitedBiomes = []; state.visitedIslands = [];
       state.weeklyKey = week;
     }
     player.questState = state;
@@ -59,7 +63,12 @@ class QuestSystem {
       if (definition.action !== action || state.completed[definition.id]) continue;
       if (definition.matches && !definition.matches(event)) continue;
       let amount = Math.max(0, Number(event.amount)||1);
-      if (definition.unique) {
+      if (definition.uniqueKey === "island") {
+        const island = typeof event.island === "string" ? event.island : "";
+        if (!island || state.visitedIslands.includes(island)) continue;
+        state.visitedIslands.push(island);
+        amount = 1;
+      } else if (definition.unique) {
         const biome = typeof event.biome === "string" ? event.biome : "";
         if (!biome || state.visitedBiomes.includes(biome)) continue;
         state.visitedBiomes.push(biome);

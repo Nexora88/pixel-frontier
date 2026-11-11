@@ -63,3 +63,26 @@ test("daily trade quest completes only on a completed trade event",()=>{
   assert.equal(snapshot.quests.find(q=>q.id==="daily_trade").completed,true);
   assert.equal(snapshot.xp,30);
 });
+
+test("weekly island quest counts distinct island identities rather than repeated visits",()=>{
+  const quests=new QuestSystem(()=>Date.UTC(2026,10,11)),player=makePlayer();
+  quests.record(player,"island",{island:"main"});
+  quests.record(player,"island",{island:"main"});
+  const snapshot=quests.record(player,"island",{island:"north-east"});
+  assert.equal(snapshot.quests.find(q=>q.id==="weekly_islander").progress,2);
+  assert.equal(snapshot.quests.find(q=>q.id==="weekly_islander").completed,true);
+  assert.equal(player.inventory.wood,12);
+});
+
+test("care, trade and settlement activity feed their own daily and weekly goals",()=>{
+  const quests=new QuestSystem(()=>Date.UTC(2026,10,11)),player=makePlayer();
+  quests.record(player,"care",{amount:1});
+  let snapshot=quests.record(player,"care",{amount:1});
+  assert.equal(snapshot.quests.find(q=>q.id==="daily_caretaker").completed,true);
+  quests.record(player,"trade",{amount:1});
+  quests.record(player,"trade",{amount:1});
+  snapshot=quests.record(player,"trade",{amount:1});
+  assert.equal(snapshot.quests.find(q=>q.id==="weekly_merchant").completed,true);
+  snapshot=quests.record(player,"settlement",{status:"defended"});
+  assert.equal(snapshot.quests.find(q=>q.id==="weekly_settlement").completed,true);
+});
