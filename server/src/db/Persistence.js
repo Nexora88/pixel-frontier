@@ -25,7 +25,7 @@ const client=await this.pool.connect();
 try{
 await client.query("BEGIN");
 for(const p of players){
-await client.query("INSERT INTO players(id,name,x,y,inventory,slots,equipment,clan_id,farming_xp,farming_quests,boat_state) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11) ON CONFLICT(id) DO UPDATE SET name=EXCLUDED.name,x=EXCLUDED.x,y=EXCLUDED.y,inventory=EXCLUDED.inventory,slots=EXCLUDED.slots,equipment=EXCLUDED.equipment,clan_id=EXCLUDED.clan_id,farming_xp=EXCLUDED.farming_xp,farming_quests=EXCLUDED.farming_quests,boat_state=EXCLUDED.boat_state,updated_at=NOW()",[p.id,p.name,p.x,p.y,JSON.stringify(p.inventory),JSON.stringify(p.slots||[]),JSON.stringify(p.equipment||{}),p.clanId||null,p.farmingXp||0,JSON.stringify(p.farmingQuests||{}),JSON.stringify(p.boat||{})]);
+await client.query("INSERT INTO players(id,name,x,y,inventory,slots,equipment,clan_id,farming_xp,farming_quests,boat_state,quest_state) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12) ON CONFLICT(id) DO UPDATE SET name=EXCLUDED.name,x=EXCLUDED.x,y=EXCLUDED.y,inventory=EXCLUDED.inventory,slots=EXCLUDED.slots,equipment=EXCLUDED.equipment,clan_id=EXCLUDED.clan_id,farming_xp=EXCLUDED.farming_xp,farming_quests=EXCLUDED.farming_quests,boat_state=EXCLUDED.boat_state,quest_state=EXCLUDED.quest_state,updated_at=NOW()",[p.id,p.name,p.x,p.y,JSON.stringify(p.inventory),JSON.stringify(p.slots||[]),JSON.stringify(p.equipment||{}),p.clanId||null,p.farmingXp||0,JSON.stringify(p.farmingQuests||{}),JSON.stringify(p.boat||{}),JSON.stringify(p.questState||{})]);
 }
 await client.query("INSERT INTO trades(id,seller_id,state) VALUES($1,$2,$3) ON CONFLICT(id) DO UPDATE SET state=EXCLUDED.state,updated_at=NOW()",[trade.id,trade.sellerId,JSON.stringify(trade)]);
 await client.query("COMMIT");
