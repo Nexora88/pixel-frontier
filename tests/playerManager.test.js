@@ -4,6 +4,7 @@ test("player manager restores stable identity and saved slot state",()=>{const w
 
 test("server movement accelerates, normalizes diagonal input and decelerates smoothly",()=>{
   const world=new WorldState("physics-test"),manager=new PlayerManager(),id=crypto.randomUUID(),p=manager.add(id,"socket-physics",null,world);
+  p.x=1500;p.y=1100;manager.indexPlayer(p);
   p.input={up:false,down:false,left:false,right:true};
   manager.update(0.05,180,world,"clear");
   assert.ok(p.vx>0&&p.vx<180,"movement should ramp up instead of instantly reaching max speed");
