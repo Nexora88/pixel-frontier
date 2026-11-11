@@ -189,21 +189,85 @@ class EnvironmentSimulation {
 }
 class SocialSystems {
   constructor() { this.clans = new Map(); this.trades = new Map(); this.nextTrade = 1; }
-  createClan(player, name) { const clean = String(name || "").trim().slice(0, 24); if (clean.length < 3 || player.clanId) return { ok: false, reason: "invalid-clan" }; const id = `clan_${Math.max(0,...[...this.clans.keys()].map(key=>Number(key.split("_").at(-1))||0))+1}`; const clan = { id, name: clean, leaderId: player.id, members: [player.id] }; this.clans.set(id, clan); player.clanId = id; return { ok: true, clan }; }
-  joinClan(player, clanId) { const clan = this.clans.get(clanId); if (!clan || player.clanId) return { ok: false, reason: "clan-unavailable" }; clan.members.push(player.id); player.clanId = clanId; return { ok: true, clan }; }
-  createTrade(player, item, quantity, priceItem, priceQuantity) {
-    if ((slotCounts(player.slots)[item] || 0) < quantity) return { ok: false, reason: "not-enough-resources" };
-    if (!ITEMS[item] || !ITEMS[priceItem] || !Number.isInteger(quantity) || !Number.isInteger(priceQuantity) || quantity < 1 || priceQuantity < 1) return { ok: false, reason: "invalid-trade" };
-    const id = `trade_${this.nextTrade++}`; this.trades.set(id, { id, sellerId: player.id, item, quantity, priceItem, priceQuantity, status: "open" }); return { ok: true, trade: this.trades.get(id) };
+
+  createClan(player, name) {
+    const clean = String(name || "").trim().slice(0, 24);
+    if (clean.length < 3 || player.clanId) return { ok: false, reason: "invalid-clan" };
+    const id = `clan_${Math.max(0, ...[...this.clans.keys()].map(key => Number(key.split("_").at(-1)) || 0)) + 1}`;
+    const clan = { id, name: clean, leaderId: player.id, members: [player.id] };
+    this.clans.set(id, clan); player.clanId = id;
+    return { ok: true, clan };
   }
+
+  joinClan(player, clanId) {
+    const clan = this.clans.get(clanId);
+    if (!clan || player.clanId || clan.members.includes(player.id)) return { ok: false, reason: "clan-unavailable" };
+    clan.members.push(player.id); player.clanId = clanId;
+    return { ok: true, clan };
+  }
+
+  createTrade(player, item, quantity, priceItem, priceQuantity) {
+    if (!ITEMS[item] || !ITEMS[priceItem] || item === priceItem ||
+        !Number.isInteger(quantity) || !Number.isInteger(priceQuantity) ||
+        quantity < 1 || quantity > 500 || priceQuantity < 1 || priceQuantity > 500) {
+      return { ok: false, reason: "invalid-trade" };
+    }
+    const activeOffers = [...this.trades.values()].filter(t => t.sellerId === player.id && t.status === "open").length;
+    if (activeOffers >= 5) return { ok: false, reason: "too-many-open-trades" };
+    const nextSlots = player.slots.map(slot => slot && ({ ...slot }));
+    const reserved = consumeFromSlots(nextSlots, { [item]: quantity });
+    if (!reserved.ok) return { ok: false, reason: "not-enough-resources" };
+    player.slots.splice(0, player.slots.length, ...nextSlots);
+    player.inventory = slotCounts(player.slots);
+    const id = `trade_${this.nextTrade++}`;
+    const trade = {
+      id, sellerId: player.id, item, quantity, priceItem, priceQuantity,
+      status: "open", createdAt: Date.now(), escrow: { item, quantity }
+    };
+    this.trades.set(id, trade);
+    return { ok: true, trade, inventory: player.inventory, slots: player.slots };
+  }
+
   acceptTrade(buyer, tradeId, seller) {
-    const trade = this.trades.get(tradeId); if (!trade || trade.status !== "open" || trade.sellerId === buyer.id || !seller || seller.id !== trade.sellerId) return { ok: false, reason: "trade-unavailable" };
-    const buyerSlots = buyer.slots.map(s => s && ({ ...s })), sellerSlots = seller.slots.map(s => s && ({ ...s }));
-    if (!consumeFromSlots(buyerSlots, { [trade.priceItem]: trade.priceQuantity }).ok || !consumeFromSlots(sellerSlots, { [trade.item]: trade.quantity }).ok) return { ok: false, reason: "not-enough-resources" };
-    if (!addToSlots(buyerSlots, trade.item, trade.quantity).ok || !addToSlots(sellerSlots, trade.priceItem, trade.priceQuantity).ok) return { ok: false, reason: "inventory-full" };
-    buyer.slots.splice(0, buyer.slots.length, ...buyerSlots); seller.slots.splice(0, seller.slots.length, ...sellerSlots);
-    buyer.inventory = slotCounts(buyer.slots); seller.inventory = slotCounts(seller.slots);
-    trade.status = "accepted"; trade.buyerId = buyer.id; return { ok: true, trade };
+    const trade = this.trades.get(tradeId);
+    if (!trade || trade.status !== "open" || trade.sellerId === buyer?.id ||
+        !seller || seller.id !== trade.sellerId || !trade.escrow ||
+        trade.escrow.item !== trade.item || trade.escrow.quantity !== trade.quantity) {
+      return { ok: false, reason: "trade-unavailable" };
+    }
+    const buyerSlots = buyer.slots.map(slot => slot && ({ ...slot }));
+    const sellerSlots = seller.slots.map(slot => slot && ({ ...slot }));
+    const paid = consumeFromSlots(buyerSlots, { [trade.priceItem]: trade.priceQuantity });
+    if (!paid.ok) return { ok: false, reason: "not-enough-resources" };
+    if (!addToSlots(buyerSlots, trade.item, trade.quantity).ok ||
+        !addToSlots(sellerSlots, trade.priceItem, trade.priceQuantity).ok) {
+      return { ok: false, reason: "inventory-full" };
+    }
+    buyer.slots.splice(0, buyer.slots.length, ...buyerSlots);
+    seller.slots.splice(0, seller.slots.length, ...sellerSlots);
+    buyer.inventory = slotCounts(buyer.slots);
+    seller.inventory = slotCounts(seller.slots);
+    trade.status = "accepted";
+    trade.buyerId = buyer.id;
+    trade.acceptedAt = Date.now();
+    trade.escrow = null;
+    return { ok: true, trade, buyerInventory: buyer.inventory, sellerInventory: seller.inventory };
+  }
+
+  cancelTrade(player, tradeId) {
+    const trade = this.trades.get(tradeId);
+    if (!trade || trade.status !== "open" || trade.sellerId !== player?.id || !trade.escrow) {
+      return { ok: false, reason: "trade-unavailable" };
+    }
+    const nextSlots = player.slots.map(slot => slot && ({ ...slot }));
+    const returned = addToSlots(nextSlots, trade.escrow.item, trade.escrow.quantity);
+    if (!returned.ok) return { ok: false, reason: "inventory-full" };
+    player.slots.splice(0, player.slots.length, ...nextSlots);
+    player.inventory = slotCounts(player.slots);
+    trade.status = "cancelled";
+    trade.cancelledAt = Date.now();
+    trade.escrow = null;
+    return { ok: true, trade, inventory: player.inventory, slots: player.slots };
   }
 }
 module.exports = { EQUIPMENT, BUILDINGS, emptySlots, addToSlots, moveSlot, slotCounts, consumeFromSlots, ChestStore, canOccupy, EnvironmentSimulation, SocialSystems };
