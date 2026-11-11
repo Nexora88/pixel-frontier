@@ -1,6 +1,6 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
-const { SocialSystems, emptySlots, addToSlots, slotCounts } = require("../server/src/world/SurvivalSystems");
+const { SocialSystems, emptySlots, addToSlots, slotCounts } = require("./SurvivalSystems");
 
 function player(id, item, amount) {
   const slots = emptySlots();
