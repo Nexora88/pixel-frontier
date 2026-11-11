@@ -18,6 +18,19 @@ async saveChunk(c,seed){if(!this.pool)return;await this.pool.query("INSERT INTO 
 async saveStructure(b){if(!this.pool)return;await this.pool.query("INSERT INTO structures(id,chunk_key,owner_id,type,state) VALUES($1,$2,$3,$4,$5) ON CONFLICT(id) DO UPDATE SET state=EXCLUDED.state,updated_at=NOW()",[b.id,b.chunkKey,b.ownerId,b.type,JSON.stringify(b)])}
 async saveClan(c){if(!this.pool)return;await this.pool.query("INSERT INTO clans(id,name,leader_id,members) VALUES($1,$2,$3,$4) ON CONFLICT(id) DO UPDATE SET name=EXCLUDED.name,members=EXCLUDED.members",[c.id,c.name,c.leaderId,JSON.stringify(c.members)])}
 async saveTrade(t){if(!this.pool)return;await this.pool.query("INSERT INTO trades(id,seller_id,state) VALUES($1,$2,$3) ON CONFLICT(id) DO UPDATE SET state=EXCLUDED.state,updated_at=NOW()",[t.id,t.sellerId,JSON.stringify(t)])}
+async saveTradeTransaction(trade,players=[]){
+if(!this.pool)return;
+const client=await this.pool.connect();
+try{
+await client.query("BEGIN");
+for(const p of players){
+await client.query("INSERT INTO players(id,name,x,y,inventory,slots,equipment,clan_id,farming_xp,farming_quests,boat_state) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11) ON CONFLICT(id) DO UPDATE SET name=EXCLUDED.name,x=EXCLUDED.x,y=EXCLUDED.y,inventory=EXCLUDED.inventory,slots=EXCLUDED.slots,equipment=EXCLUDED.equipment,clan_id=EXCLUDED.clan_id,farming_xp=EXCLUDED.farming_xp,farming_quests=EXCLUDED.farming_quests,boat_state=EXCLUDED.boat_state,updated_at=NOW()",[p.id,p.name,p.x,p.y,JSON.stringify(p.inventory),JSON.stringify(p.slots||[]),JSON.stringify(p.equipment||{}),p.clanId||null,p.farmingXp||0,JSON.stringify(p.farmingQuests||{}),JSON.stringify(p.boat||{})]);
+}
+await client.query("INSERT INTO trades(id,seller_id,state) VALUES($1,$2,$3) ON CONFLICT(id) DO UPDATE SET state=EXCLUDED.state,updated_at=NOW()",[trade.id,trade.sellerId,JSON.stringify(trade)]);
+await client.query("COMMIT");
+}catch(error){await client.query("ROLLBACK").catch(()=>{});throw error}
+finally{client.release()}
+}
 async saveMeta(key,value){if(!this.pool)return;await this.pool.query("INSERT INTO world_meta(meta_key,value) VALUES($1,$2) ON CONFLICT(meta_key) DO UPDATE SET value=EXCLUDED.value,updated_at=NOW()",[key,JSON.stringify(value)])}
 async close(){if(this.pool)await this.pool.end()}
 }
